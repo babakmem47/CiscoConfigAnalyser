@@ -58,6 +58,37 @@
     <script src="/js/bootstrap.js"></script>
     <script>
 
+        var rootConfig = new Node('rootConfig');
+
+        function Node(value) {
+
+            this.value = value;
+            this.children = [];
+            this.parent = null;
+
+            this.setParentNode = function (node) {
+                this.parent = node;
+            }
+
+            this.getParentNode = function () {
+                return this.parent;
+            }
+
+            this.addChild = function (node) {
+                node.setParentNode(this);
+                this.children[this.children.length] = node;
+            }
+
+            this.getChildren = function () {
+                return this.children;
+            }
+
+            this.removeChildren = function () {
+                this.children = [];
+            }
+        }
+
+
         // Load textarea by selected config file from input btn
 
         function LoadTextFile() {
@@ -70,18 +101,26 @@
                 document.getElementById("textarea1").innerHTML = fileString;
                 ////////////////////////////////////////////////////////////////////////////////////
                 // because it's async, we have to put our logic in this function!
+
+                // reset config tree
+                rootConfig.removeChildren();
+
                 var linesOfConfig = document.getElementById("textarea1").value.split("\n");
                 var listOfFirstWords = GetFirstWordsOfConfig(linesOfConfig);
+                //var listOfFirstWords = ["version", "multilink", "controller", "vrf", "interface", "ip", "snmp-server", "line"];
+                var preferedList = ["interface", "ip", "controller", "line"];
+                var sortedFirstWords = SortFirstListBaseOnSecond(listOfFirstWords, preferedList);
 
+                //Populate Select 1 with FirstWords
                 ResetElement("select1");
-                PopulateFirstSelect(listOfFirstWords);
+                PopulateFirstSelect(sortedFirstWords);
 
 
                 /////////////////////////////////////////////////////////////////////////////////////
 
             };
             reader.readAsText(file);
-            
+
 
         }
 
@@ -109,7 +148,28 @@
             return firstWordsList;
         }
 
+        function SortFirstListBaseOnSecond(firstWords, preferedItems) {
+            var i = 0;
+            var index = 0;
+            while (i < preferedItems.length) {
+                var item = preferedItems[i];
+                var j = 0;
+                while (j < firstWords.length) {
+                    if (item == firstWords[j]) {
+                        var temp = firstWords[index];
+                        firstWords[index] = item;
+                        firstWords[j] = temp;
+                        index++;
+                        break;
+                    }
+                    j++;
+                }
+                i++;
+            }
 
+            return firstWords;
+            
+        }
 
         // Give string array to a Select to populate its options.
         function PopulateFirstSelect(firstWordsList) {
@@ -122,6 +182,23 @@
                 firstSelect.insertBefore(option, firstSelect.lastChild);
             }
         }
+
+        function BuildTreeOfConfig(FirstWords, linesOfConfig) {
+
+
+            //Add this firstword and its children to tree of config
+            rootConfig.addChild(new Node(firstWord));
+            if (wordsInThisLine.length == 1) { break; }
+
+            var childIndex = firstWordsList.length;
+            var j = 1;
+            while (j < wordsInThisLine.length) {
+                console.log(firstWord + ": " + j + "nd: " + wordsInThisLine[j]);
+                //rootConfig.children[childIndex].addChild(wordsInThisLine[j]);
+                j++;
+            }
+        }
+
 
         function ResetElement(elementId) {
             var element = document.getElementById(elementId);

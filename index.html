@@ -107,8 +107,7 @@
 
                 var linesOfConfig = document.getElementById("textarea1").value.split("\n");
                 var listOfFirstWords = GetFirstWordsOfConfig(linesOfConfig);
-                //var listOfFirstWords = ["version", "multilink", "controller", "vrf", "interface", "ip", "snmp-server", "line"];
-                var preferedList = ["interface", "ip", "controller", "line"];
+                var preferedList = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
                 var sortedFirstWords = SortFirstListBaseOnSecond(listOfFirstWords, preferedList);
 
                 //Populate Select 1 with FirstWords
@@ -132,6 +131,7 @@
                 if (thisLineOfConfig.charAt(0) === "!" || thisLineOfConfig.charAt(0) === " ") { continue; }
 
                 var wordsInThisLine = thisLineOfConfig.split(" ");
+                AddThisLineToConfigTree(wordsInThisLine);
                 var firstWord = wordsInThisLine[0];
                 var isAlreadyInList = false;
                 for (var j = 0; j < firstWordsList.length; j++) {
@@ -168,7 +168,7 @@
             }
 
             return firstWords;
-            
+
         }
 
         // Give string array to a Select to populate its options.
@@ -183,20 +183,23 @@
             }
         }
 
-        function BuildTreeOfConfig(FirstWords, linesOfConfig) {
 
-
-            //Add this firstword and its children to tree of config
-            rootConfig.addChild(new Node(firstWord));
-            if (wordsInThisLine.length == 1) { break; }
-
-            var childIndex = firstWordsList.length;
-            var j = 1;
-            while (j < wordsInThisLine.length) {
-                console.log(firstWord + ": " + j + "nd: " + wordsInThisLine[j]);
-                //rootConfig.children[childIndex].addChild(wordsInThisLine[j]);
-                j++;
+        function AddThisLineToConfigTree(thisLine) {
+            console.log(thisLine);
+            var i = 0;
+            while(i < thisLine.length){
+                if(i == 0){
+                    rootConfig.addChild(new Node(thisLine[0]));
+                }
+                else if(i == 1){
+                    rootConfig.children[0].addChild(new Node(thisLine[1]));
+                }
+                else if (i == 2) {
+                    rootConfig.children[0].children[0].addChild(new Node(thisLine[2]));
+                }
+                i++;
             }
+
         }
 
 

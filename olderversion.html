@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="css/bootstrap.min.css" rel="stylesheet">
-
     <title>Document</title>
 </head>
-
 <body>
     <div class="container">
         <div class="row">
@@ -22,75 +19,30 @@
             </div>
             <div class="col-xs-6 col-lg-6">
                 <form class="form-inline">
-
                     <div class="checkbox">
                         <label>
                             <input type="checkbox" id="checkbox1"> Show Only :
                         </label>
                     </div>
-
                     <select id="select1" class="form-control">
-
                     </select>
-
                     <select id="select2" class="form-control">
-
                     </select>
-
                     <button type="button" class="btn btn-primary">Show</button>
-
                 </form>
-
                 <button id="button2" class="btn btn-default" onclick="PopulateFirstSelect(['interface', 'ip', 'controller'])">PopulateSelect1</button>
                 <button id="button3" class="btn btn-default" onclick="ResetElement('select1')">ResetElement</button>
                 <button id="button4" class="btn btn-default" onclick="ClearOptions('select1')">ClearOptions</button>
                 <button id="button5" class="btn btn-default" onclick="ReadTextAreaContent()">ReadTextArea</button>
                 <button id="button6" class="btn btn-default" onclick="ShowAsciiCodeOfChars('show ver ')">ShowAsciiCodeOfChars</button>
-
             </div>
         </div>
     </div>
-
-
-
     <script src="/js/jquery-3.3.1.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/js/bootstrap.js"></script>
     <script>
-
-        var rootConfig = new Node('rootConfig');
-
-        function Node(value) {
-
-            this.value = value;
-            this.children = [];
-            this.parent = null;
-
-            this.setParentNode = function (node) {
-                this.parent = node;
-            }
-
-            this.getParentNode = function () {
-                return this.parent;
-            }
-
-            this.addChild = function (node) {
-                node.setParentNode(this);
-                this.children[this.children.length] = node;
-            }
-
-            this.getChildren = function () {
-                return this.children;
-            }
-
-            this.removeChildren = function () {
-                this.children = [];
-            }
-        }
-
-
         // Load textarea by selected config file from input btn
-
         function LoadTextFile() {
             var file = document.getElementById('InputFileButton').files[0];
             var reader = new FileReader();
@@ -101,37 +53,23 @@
                 document.getElementById("textarea1").innerHTML = fileString;
                 ////////////////////////////////////////////////////////////////////////////////////
                 // because it's async, we have to put our logic in this function!
-
-                // reset config tree
-                rootConfig.removeChildren();
-
                 var linesOfConfig = document.getElementById("textarea1").value.split("\n");
                 var listOfFirstWords = GetFirstWordsOfConfig(linesOfConfig);
-                var preferedList = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
-                var sortedFirstWords = SortFirstListBaseOnSecond(listOfFirstWords, preferedList);
-
-                //Populate Select 1 with FirstWords
                 ResetElement("select1");
-                PopulateFirstSelect(sortedFirstWords);
-
-
+                PopulateFirstSelect(listOfFirstWords);
                 /////////////////////////////////////////////////////////////////////////////////////
-
             };
             reader.readAsText(file);
-
-
+            
         }
-
+        
         function GetFirstWordsOfConfig(linesOfConfig) {
             var firstWordsList = [];
             for (var i = 0; i < linesOfConfig.length; i++) {
                 var thisLineOfConfig = linesOfConfig[i];
                 if (thisLineOfConfig.length == 0) { continue; }
                 if (thisLineOfConfig.charAt(0) === "!" || thisLineOfConfig.charAt(0) === " ") { continue; }
-
                 var wordsInThisLine = thisLineOfConfig.split(" ");
-                AddThisLineToConfigTree(wordsInThisLine);
                 var firstWord = wordsInThisLine[0];
                 var isAlreadyInList = false;
                 for (var j = 0; j < firstWordsList.length; j++) {
@@ -144,33 +82,8 @@
                     firstWordsList.push(firstWord);
                 }
             }
-
             return firstWordsList;
         }
-
-        function SortFirstListBaseOnSecond(firstWords, preferedItems) {
-            var i = 0;
-            var index = 0;
-            while (i < preferedItems.length) {
-                var item = preferedItems[i];
-                var j = 0;
-                while (j < firstWords.length) {
-                    if (item == firstWords[j]) {
-                        var temp = firstWords[index];
-                        firstWords[index] = item;
-                        firstWords[j] = temp;
-                        index++;
-                        break;
-                    }
-                    j++;
-                }
-                i++;
-            }
-
-            return firstWords;
-
-        }
-
         // Give string array to a Select to populate its options.
         function PopulateFirstSelect(firstWordsList) {
             var firstSelect = document.getElementById("select1");
@@ -182,41 +95,19 @@
                 firstSelect.insertBefore(option, firstSelect.lastChild);
             }
         }
-
-
-        function AddThisLineToConfigTree(thisLine) {
-            console.log(thisLine);
-            var i = 0;
-            while(i < thisLine.length){
-                console.log(rootConfig.children[i].length)
-                // var isAlreadyExist = false;
-                // for(j = 0; j < rootConfig.children[i].length){
-                //     if(thisLine[i] == rootConfig.children[j].value)
-                //         isAlreadyExist = true;
-                // }
-               
-                i++;
-            }
-
-        }
-
-
         function ResetElement(elementId) {
             var element = document.getElementById(elementId);
             element.options.length = 0;
         }
-
         function ClearOptions(elementId) {
             var element = document.getElementById(elementId);
             while (element.length > 0)
                 element.remove(0);
         }
-
         function ReadTextAreaContent() {
             var linesOfConfig = document.getElementById("textarea1").value.split("\n");
             ShowAsciiCodeOfChars(linesOfConfig[2]);
         }
-
         function ShowAsciiCodeOfChars(array) {
             var length = array.length;
             var i = 0;
@@ -225,9 +116,6 @@
                 i++;
             }
         }
-
-
     </script>
 </body>
-
 </html>

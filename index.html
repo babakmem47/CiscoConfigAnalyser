@@ -183,24 +183,6 @@
             }
         }
 
-
-        function AddThisLineToConfigTree(thisLine) {
-            console.log(thisLine);
-            var i = 0;
-            while(i < thisLine.length){
-                console.log(rootConfig.children[i].length)
-                // var isAlreadyExist = false;
-                // for(j = 0; j < rootConfig.children[i].length){
-                //     if(thisLine[i] == rootConfig.children[j].value)
-                //         isAlreadyExist = true;
-                // }
-               
-                i++;
-            }
-
-        }
-
-
         function ResetElement(elementId) {
             var element = document.getElementById(elementId);
             element.options.length = 0;
@@ -225,6 +207,96 @@
                 i++;
             }
         }
+
+        /////////////////////// This function add words in a line of config to rootConfig tree/////////////////////////////
+        
+        function AddThisLineToConfigTree(wordsInThisLine) {
+            var precededWords = [];
+            wordsInThisLine = DivideInterfacesIntoSubString(wordsInThisLine);
+            for (var i = 0; i < wordsInThisLine.length; i++) {
+                AddNode(precededWords, wordsInThisLine[i])
+                precededWords.push(wordsInThisLine[i]);
+            }
+        }
+
+        function AddNode(precededWords, node) {             // precededParents: words before node in a line of code
+            var parent = FindParentOfANode(precededWords, node);
+            InsertNodeUnderItsParent(node, parent);
+        }
+
+        function FindParentOfANode(precededNodesList, node) {   //FindParentOfANode(["service", "timestamp"], 'log')
+            var parent = rootConfig
+            var index = 0;
+            while (index < precededNodesList.length) {
+                var childs = parent.children;
+                for (var i = 0; i < childs.length; i++) {
+                    if (childs[i].value == precededNodesList[index]) {
+                        parent = childs[i];
+                        index++;
+                        break;
+                    }
+                }
+            }
+
+            return parent;
+        }
+
+
+
+        function InsertNodeUnderItsParent(node, parent) {
+            var childsOfParent = parent.children;
+            var isBetweenChildsAlready = false;
+            for (i = 0; i < childsOfParent.length; i++) {
+                if (node == parent.children[i].value) {
+                    isBetweenChildsAlready = true;
+                    break;
+                }
+            }
+            if (isBetweenChildsAlready == false) {
+                parent.addChild(new Node(node));
+            }
+
+        }
+
+        function DivideInterfacesIntoSubString(wordsInThisLine) {
+            var thisLineOfCode = [];
+            thisLineOfCode.push(wordsInThisLine[0]);
+
+            for (var i = 1; i < wordsInThisLine.length; i++) {
+                var word = wordsInThisLine[i];
+                var j = 0;
+                var findDigit = false;
+                while (j < word.length) {
+                    if (word.charCodeAt(j) >= 48 && word.charCodeAt(j) <= 57) {
+                        if (word.charCodeAt(j - 1) >= 65 && word.charCodeAt(j - 1) <= 122) {
+                            findDigit = true;
+                            thisLineOfCode.push(word.substring(0, j));
+                            word = word.substring(j, word.length);
+                            var indexOfdot = word.indexOf(".");
+                            if (indexOfdot == -1) {
+                                thisLineOfCode.push(word);
+                            }
+                            else {
+                                thisLineOfCode.push(word.substring(0, indexOfdot));
+                                thisLineOfCode.push(word.substring(indexOfdot, word.length));
+                            }
+
+                            break;
+                        }
+                    }
+                    j++;
+
+                }
+
+                if (findDigit == false) {
+                    thisLineOfCode.push(word);
+                }
+            }
+            return thisLineOfCode
+        }
+        ///////////////////////////////////// end of functions that add nodes to tree of config ////////////
+
+
 
 
     </script>

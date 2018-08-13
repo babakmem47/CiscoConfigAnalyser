@@ -177,9 +177,30 @@ function AddThisLineToConfigTree(wordsInThisLine){
     var precededWords = [];
     for(var i = 0; i < wordsInThisLine.length; i++){
         AddNode(precededWords, wordsInThisLine[i])
-        //console.log("[" + precededWords + "]" + wordsInThisLine[i])
         precededWords.push(wordsInThisLine[i]);
     }
+}
+
+function AddNode(precededWords, node) {             // precededParents: words before node in a line of code
+    var parent = FindParentOfANode(precededWords, node);
+    InsertNodeUnderItsParent(node, parent);
+}
+
+function FindParentOfANode(precededNodesList, node){   //FindParentOfANode(["service", "timestamp"], 'log')
+    var parent = rootConfig
+    var index = 0;    
+    while(index < precededNodesList.length){
+        var childs = parent.children;
+        for(var i = 0; i < childs.length; i++) {
+            if(childs[i].value == precededNodesList[index]){
+                parent = childs[i];
+                index++;
+                break;
+            }    
+        }    
+    }
+    
+    return parent;
 }
 
 
@@ -206,28 +227,6 @@ function InsertNodeUnderItsParent(node, parent){
     }
 }
 
-function FindParentOfANode(precededNodesList, node){   //FindParentOfANode(["service", "timestamp"], 'log')
-    var parent = rootConfig
-    var index = 0;    
-    while(index < precededNodesList.length){
-        var childs = parent.children;
-        for(var i = 0; i < childs.length; i++) {
-            if(childs[i].value == precededNodesList[index]){
-                parent = childs[i];
-                index++;
-                break;
-            }    
-        }    
-    }
-    //console.log(parent.value);
-    return parent;
-}
-function AddNode(precededWords, node) {   // precededParents: words before node in a line of code
-    // precededParents = ["version", "15.5"];
-    // var node = "xxx";
-    var parent = FindParentOfANode(precededWords, node);
-    InsertNodeUnderItsParent(node, parent);
-}
 
 // InsertNodeUnderItsParent('version', rootConfig);
 // var version = rootConfig.children[0];

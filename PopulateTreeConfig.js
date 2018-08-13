@@ -31,28 +31,97 @@ function Node(value) {
 var configfile = `
 version 15.5
 service timestamps debug datetime msec
-service timestamps log datetime msec
-
-service password-encryption
-
-username pol privilege 2 secret 5 $1$LcxX$lFwq4pM2GT5XGAKOukTRU1
-!
-vrf definition Mgmt-intf
- !
- address-family ipv4
- exit-address-family
-
-controller SONET 0/1/0
- threshold sf-ber 3
-
-multilink bundle-name authenticated
-!!
-license udi pid ASR1002-X sn JAE202202LC
+license udi pid ASR1002-X sn JAE202202GS
 archive
  log config
-
+  logging enable
+!
+spanning-tree extend system-id
+!
+username admin privilege 15 secret 5 $1$pPJA$uw0vPx9tHhxWLug49BRhO1
+username master privilege 15 secret 5 $1$pK/x$nv7VWPHz9rVPBA3SFDG4K1
+!
 interface Loopback0
  ip address 10.20.30.121 255.255.255.252
+!
+interface Tunnel0
+ description [TDLTE-7tir]
+ ip address 192.168.225.1 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.19.5.162
+ tunnel destination 172.19.5.218
+!
+interface Tunnel1
+ description description [TDLTE-Negin]
+ ip address 192.168.225.5 255.255.255.252
+ keepalive 5 4
+ tunnel source 172.19.5.162
+ tunnel destination 172.19.5.62
+!
+interface Tunnel500
+ description MPLS-Negin
+ ip address 192.168.49.29 255.255.255.252
+ ip tcp adjust-mss 1360
+ tunnel source 172.19.8.34
+ tunnel destination 172.17.16.34
+!
+interface GigabitEthernet0/0/0
+ no ip address
+ negotiation auto
+!
+interface GigabitEthernet0/0/0.116
+ description [TDLTE-Mobin]
+ encapsulation dot1Q 116
+ ip address 172.19.5.162 255.255.255.224
+!
+interface GigabitEthernet0/0/0.259
+ encapsulation dot1Q 259
+ ip address 10.200.0.49 255.255.255.252
+!
+interface GigabitEthernet0/0/0.901
+ description [MPLS-Negin]
+ encapsulation dot1Q 901
+ ip address 172.19.8.34 255.255.255.252
+!
+interface GigabitEthernet0/0/1
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/0/2
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/0/3
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/0/4
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/0/5
+ ip address 10.200.0.18 255.255.255.252
+ negotiation auto
+!
+interface Serial0/1/0.1/1/1/1:0
+ description [ATM-1160-Mostazafin Firoozkooh]
+ ip unnumbered Loopback0
+ encapsulation ppp
+!
+interface Serial0/1/0.1/1/1/1:1
+ description [0195-Tellabs-1M]
+ ip address 10.51.3.105 255.255.255.252
+ encapsulation ppp
+!
+interface Serial0/1/0.1/1/1/1:5
+ description 0191-64K
+ no ip address
+ shutdown
 !
 `;
 
@@ -104,16 +173,72 @@ function SortFirstListBaseOnSecond(firstWords, preferedItems) {
 
 }
 
-function AddThisLineToConfigTree(wordsInThisLine) {
-    var i = 0;
-    while(i < wordsInThisLine.length){
-        console.log("line " + wordsInThisLine + " length: " + wordsInThisLine.length);
-        i++;
+function AddThisLineToConfigTree(wordsInThisLine){
+    var precededWords = [];
+    for(var i = 0; i < wordsInThisLine.length; i++){
+        AddNode(precededWords, wordsInThisLine[i])
+        //console.log("[" + precededWords + "]" + wordsInThisLine[i])
+        precededWords.push(wordsInThisLine[i]);
     }
 }
+
 
 var linesOfConfig = configfile.split("\n");
 var listOfFirstWords = GetFirstWordsOfConfig(linesOfConfig);
 var preferedList = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
 var sortedFirstWords = SortFirstListBaseOnSecond(listOfFirstWords, preferedList);
+//var childOfEthernet0 = rootConfig.children[2].getChildren();
+
+function InsertNodeUnderItsParent(node, parent){
+    var childsOfParent = parent.children;
+    var isBetweenChildsAlready = false;
+    for(i = 0; i < childsOfParent.length; i++){
+        if(node == parent.children[i].value){
+            isBetweenChildsAlready = true;
+            break;
+        }
+    }
+    if(isBetweenChildsAlready == true) {
+        console.log(node + " already exist for this parent")
+    }
+    else{
+        parent.addChild(new Node(node));
+    }
+}
+
+function FindParentOfANode(precededNodesList, node){   //FindParentOfANode(["service", "timestamp"], 'log')
+    var parent = rootConfig
+    var index = 0;    
+    while(index < precededNodesList.length){
+        var childs = parent.children;
+        for(var i = 0; i < childs.length; i++) {
+            if(childs[i].value == precededNodesList[index]){
+                parent = childs[i];
+                index++;
+                break;
+            }    
+        }    
+    }
+    //console.log(parent.value);
+    return parent;
+}
+function AddNode(precededWords, node) {   // precededParents: words before node in a line of code
+    // precededParents = ["version", "15.5"];
+    // var node = "xxx";
+    var parent = FindParentOfANode(precededWords, node);
+    InsertNodeUnderItsParent(node, parent);
+}
+
+// InsertNodeUnderItsParent('version', rootConfig);
+// var version = rootConfig.children[0];
+// InsertNodeUnderItsParent('15.5', version);
+// InsertNodeUnderItsParent('service', rootConfig);
+// var service = rootConfig.children[1];
+// InsertNodeUnderItsParent('timestamps', service);
+// var serviceTimestamps = service.children[0];
+// InsertNodeUnderItsParent('debug', serviceTimestamps);
+// InsertNodeUnderItsParent('log', serviceTimestamps);
+//FindParentOfANode(["service", "timestamp"], 'log');
+console.log("salam");
+
 

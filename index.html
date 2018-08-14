@@ -23,13 +23,13 @@
             <div class="col-xs-6 col-lg-6">
                 <form class="form-inline">
 
-                    <div class="checkbox">
+                    <!-- <div class="checkbox">
                         <label>
                             <input type="checkbox" id="checkbox1"> Show Only :
                         </label>
-                    </div>
+                    </div> -->
 
-                    <select id="select1" class="form-control">
+                    <select id="select1" class="form-control" onchange="PopulateSelect2BaseOnSelect1Option()">
 
                     </select>
 
@@ -37,15 +37,27 @@
 
                     </select>
 
+                    <select id="select3" class="form-control">
+
+                    </select>
+
+                    <select id="select4" class="form-control">
+
+                    </select>
+
+                    <select id="select5" class="form-control">
+
+                    </select>
+
                     <button type="button" class="btn btn-primary">Show</button>
 
                 </form>
 
-                <button id="button2" class="btn btn-default" onclick="PopulateFirstSelect(['interface', 'ip', 'controller'])">PopulateSelect1</button>
+                <!-- <button id="button2" class="btn btn-default" onclick="PopulateFirstSelect(['interface', 'ip', 'controller'])">PopulateSelect1</button>
                 <button id="button3" class="btn btn-default" onclick="ResetElement('select1')">ResetElement</button>
                 <button id="button4" class="btn btn-default" onclick="ClearOptions('select1')">ClearOptions</button>
                 <button id="button5" class="btn btn-default" onclick="ReadTextAreaContent()">ReadTextArea</button>
-                <button id="button6" class="btn btn-default" onclick="ShowAsciiCodeOfChars('show ver ')">ShowAsciiCodeOfChars</button>
+                <button id="button6" class="btn btn-default" onclick="ShowAsciiCodeOfChars('show ver ')">ShowAsciiCodeOfChars</button> -->
 
             </div>
         </div>
@@ -110,11 +122,12 @@
                 var listOfFirstWords = ChildrenValuesInString(rootConfig);
                 var preferedItems = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
                 rootConfig = SortNodeChildsBaseOnPreferedItems(rootConfig, preferedItems);
-                
+
                 //Populate Select 1 with FirstWords
                 ResetElement("select1");
                 var sortedFirstWords = ChildrenValuesInString(rootConfig);
                 PopulateFirstSelect(sortedFirstWords);
+                PopulateSelect2BaseOnSelect1Option();
 
 
                 /////////////////////////////////////////////////////////////////////////////////////
@@ -180,6 +193,17 @@
             }
         }
 
+        function PopulateSelect(selectId, list) {
+            var thisSelect = document.getElementById(selectId);
+            for (var i = 0; i < list.length; i++) {
+                var option = document.createElement("OPTION");
+                var item = document.createTextNode(list[i]);
+                option.appendChild(item);
+                option.setAttribute("value", list[i]);
+                thisSelect.insertBefore(option, thisSelect.lastChild);
+            }
+        }
+
         function ResetElement(elementId) {
             var element = document.getElementById(elementId);
             element.options.length = 0;
@@ -205,6 +229,17 @@
             }
         }
 
+        function PopulateSelect2BaseOnSelect1Option() {
+            var select1Value = document.getElementById("select1").value;
+            ResetElement("select2");
+            var list = [];
+            list.push(select1Value);
+            var findedNode = LocateLastNodeInList(rootConfig, list)
+            var listOfChilds = ChildrenValuesInString(findedNode);
+            PopulateSelect("select2", listOfChilds);
+            //console.log(findedNode.getChildren());
+        }
+
         /////////////////////// This function add words in a line of config to rootConfig tree/////////////////////////////
 
         function AddThisLineToConfigTree(wordsInThisLine) {
@@ -217,25 +252,25 @@
         }
 
         function AddNode(precededWords, node) {             // precededParents: words before node in a line of code
-            var parent = FindParentOfANode(precededWords);
+            var parent = LocateLastNodeInList(rootConfig, precededWords);
             InsertNodeUnderItsParent(node, parent);
         }
 
-        function FindParentOfANode(precededNodesList) {   //FindParentOfANode(["interface", "GigabitEthernet"])  for '0/0/0'
-            var parent = rootConfig
+        function LocateLastNodeInList(startNode, precededNodesList) {   // LocateLastNodeInList(startNode, ["service", "timestamp"])
+            var lastNode = startNode
             var index = 0;
             while (index < precededNodesList.length) {
-                var childs = parent.children;
+                var childs = lastNode.children;
                 for (var i = 0; i < childs.length; i++) {
                     if (childs[i].value == precededNodesList[index]) {
-                        parent = childs[i];
+                        lastNode = childs[i];
                         index++;
                         break;
                     }
                 }
             }
 
-            return parent;
+            return lastNode;
         }
 
 

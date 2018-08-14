@@ -41,6 +41,14 @@ spanning-tree extend system-id
 username admin privilege 15 secret 5 $1$pPJA$uw0vPx9tHhxWLug49BRhO1
 username master privilege 15 secret 5 $1$pK/x$nv7VWPHz9rVPBA3SFDG4K1
 !
+controller E1 1/0
+ framing NO-CRC4 
+ channel-group 5 timeslots 5-12
+ channel-group 13 timeslots 13-20
+!
+crypto isakmp policy 1
+ encr 3des
+
 interface Loopback0
  ip address 10.20.30.121 255.255.255.252
 !
@@ -125,7 +133,7 @@ interface Serial0/1/0.1/1/1/1:5
 !
 `;
 
-function GetFirstWordsOfConfig(linesOfConfig) {
+function CheckEveryLinesOfRawConfig(linesOfConfig) {
     var firstWordsList = [];
     for (var i = 0; i < linesOfConfig.length; i++) {
         var thisLineOfConfig = linesOfConfig[i];
@@ -133,34 +141,21 @@ function GetFirstWordsOfConfig(linesOfConfig) {
         if (thisLineOfConfig.charAt(0) === "!" || thisLineOfConfig.charAt(0) === " ") { continue; }
 
         var wordsInThisLine = thisLineOfConfig.split(" ");
-        AddThisLineToConfigTree(wordsInThisLine);
-        var firstWord = wordsInThisLine[0];
-        var isAlreadyInList = false;
-        for (var j = 0; j < firstWordsList.length; j++) {
-            if (firstWord == firstWordsList[j]) {
-                isAlreadyInList = true;
-                break;
-            }
-        }
-        if (!isAlreadyInList) {
-            firstWordsList.push(firstWord);
-        }
+        AddThisLineToConfigTree(wordsInThisLine);       
     }
-
-    return firstWordsList;
 }
 
-function SortFirstListBaseOnSecond(firstWords, preferedItems) {
+function SortNodeChildsBaseOnPreferedItems(node, prefItems) {
     var i = 0;
     var index = 0;
-    while (i < preferedItems.length) {
-        var item = preferedItems[i];
+    while (i < prefItems.length) {
+        var item = prefItems[i];
         var j = 0;
-        while (j < firstWords.length) {
-            if (item == firstWords[j]) {
-                var temp = firstWords[index];
-                firstWords[index] = item;
-                firstWords[j] = temp;
+        while (j < node.children.length) {
+            if (item == node.children[j].value) {
+                var temp =  node.children[index];
+                node.children[index] = node.children[j];
+                node.children[j] = temp;
                 index++;
                 break;
             }
@@ -169,8 +164,7 @@ function SortFirstListBaseOnSecond(firstWords, preferedItems) {
         i++;
     }
 
-    return firstWords;
-
+    return node;
 }
 
 function AddThisLineToConfigTree(wordsInThisLine){
@@ -183,28 +177,26 @@ function AddThisLineToConfigTree(wordsInThisLine){
 }
 
 function AddNode(precededWords, node) {             // precededParents: words before node in a line of code
-    var parent = FindParentOfANode(precededWords, node);
+    var parent = LocateLastNodeInList(rootConfig ,precededWords);
     InsertNodeUnderItsParent(node, parent);
 }
 
-function FindParentOfANode(precededNodesList, node){   //FindParentOfANode(["service", "timestamp"], 'log')
-    var parent = rootConfig
+function LocateLastNodeInList(startNode, precededNodesList){   // LocateLastNodeInList(startNode, ["service", "timestamp"])
+    var lastNode = startNode
     var index = 0;    
     while(index < precededNodesList.length){
-        var childs = parent.children;
+        var childs = lastNode.children;
         for(var i = 0; i < childs.length; i++) {
             if(childs[i].value == precededNodesList[index]){
-                parent = childs[i];
+                lastNode = childs[i];
                 index++;
                 break;
             }    
         }    
     }
     
-    return parent;
+    return lastNode;
 }
-
-
 
 function InsertNodeUnderItsParent(node, parent){
     var childsOfParent = parent.children;
@@ -258,24 +250,21 @@ function DivideInterfacesIntoSubString(wordsInThisLine) {
     return thisLineOfCode
 }
 
+function ChildrenValuesInString(node) {
+    var childsValues = [];
+    for(i = 0; i < node.children.length; i++){
+        childsValues.push(node.children[i].value);
+    }
+
+    return childsValues;
+}
 
 var linesOfConfig = configfile.split("\n");
-var listOfFirstWords = GetFirstWordsOfConfig(linesOfConfig);
-var preferedList = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
-var sortedFirstWords = SortFirstListBaseOnSecond(listOfFirstWords, preferedList);
+CheckEveryLinesOfRawConfig(linesOfConfig);
+var listOfFirstWords = ChildrenValuesInString(rootConfig);
+var preferedItems = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
+//SortNodeChildsBaseOnPreferedItems(rootConfig ,preferedItems);
 console.log("salam");
 
-
-//var childOfEthernet0 = rootConfig.children[2].getChildren();
-// InsertNodeUnderItsParent('version', rootConfig);
-// var version = rootConfig.children[0];
-// InsertNodeUnderItsParent('15.5', version);
-// InsertNodeUnderItsParent('service', rootConfig);
-// var service = rootConfig.children[1];
-// InsertNodeUnderItsParent('timestamps', service);
-// var serviceTimestamps = service.children[0];
-// InsertNodeUnderItsParent('debug', serviceTimestamps);
-// InsertNodeUnderItsParent('log', serviceTimestamps);
-//FindParentOfANode(["service", "timestamp"], 'log');
 
 

@@ -106,12 +106,14 @@
                 rootConfig.removeChildren();
 
                 var linesOfConfig = document.getElementById("textarea1").value.split("\n");
-                var listOfFirstWords = GetFirstWordsOfConfig(linesOfConfig);
-                var preferedList = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
-                var sortedFirstWords = SortFirstListBaseOnSecond(listOfFirstWords, preferedList);
-
+                CheckEveryLinesOfRawConfig(linesOfConfig);
+                var listOfFirstWords = ChildrenValuesInString(rootConfig);
+                var preferedItems = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
+                rootConfig = SortNodeChildsBaseOnPreferedItems(rootConfig, preferedItems);
+                
                 //Populate Select 1 with FirstWords
                 ResetElement("select1");
+                var sortedFirstWords = ChildrenValuesInString(rootConfig);
                 PopulateFirstSelect(sortedFirstWords);
 
 
@@ -123,7 +125,7 @@
 
         }
 
-        function GetFirstWordsOfConfig(linesOfConfig) {
+        function CheckEveryLinesOfRawConfig(linesOfConfig) {
             var firstWordsList = [];
             for (var i = 0; i < linesOfConfig.length; i++) {
                 var thisLineOfConfig = linesOfConfig[i];
@@ -132,33 +134,29 @@
 
                 var wordsInThisLine = thisLineOfConfig.split(" ");
                 AddThisLineToConfigTree(wordsInThisLine);
-                var firstWord = wordsInThisLine[0];
-                var isAlreadyInList = false;
-                for (var j = 0; j < firstWordsList.length; j++) {
-                    if (firstWord == firstWordsList[j]) {
-                        isAlreadyInList = true;
-                        break;
-                    }
-                }
-                if (!isAlreadyInList) {
-                    firstWordsList.push(firstWord);
-                }
             }
-
-            return firstWordsList;
         }
 
-        function SortFirstListBaseOnSecond(firstWords, preferedItems) {
+        function ChildrenValuesInString(node) {
+            var childsValues = [];
+            for (i = 0; i < node.children.length; i++) {
+                childsValues.push(node.children[i].value);
+            }
+
+            return childsValues;
+        }
+
+        function SortNodeChildsBaseOnPreferedItems(node, prefItems) {
             var i = 0;
             var index = 0;
-            while (i < preferedItems.length) {
-                var item = preferedItems[i];
+            while (i < prefItems.length) {
+                var item = prefItems[i];
                 var j = 0;
-                while (j < firstWords.length) {
-                    if (item == firstWords[j]) {
-                        var temp = firstWords[index];
-                        firstWords[index] = item;
-                        firstWords[j] = temp;
+                while (j < node.children.length) {
+                    if (item == node.children[j].value) {
+                        var temp = node.children[index];
+                        node.children[index] = node.children[j];
+                        node.children[j] = temp;
                         index++;
                         break;
                     }
@@ -167,8 +165,7 @@
                 i++;
             }
 
-            return firstWords;
-
+            return node;
         }
 
         // Give string array to a Select to populate its options.
@@ -209,7 +206,7 @@
         }
 
         /////////////////////// This function add words in a line of config to rootConfig tree/////////////////////////////
-        
+
         function AddThisLineToConfigTree(wordsInThisLine) {
             var precededWords = [];
             wordsInThisLine = DivideInterfacesIntoSubString(wordsInThisLine);
@@ -220,11 +217,11 @@
         }
 
         function AddNode(precededWords, node) {             // precededParents: words before node in a line of code
-            var parent = FindParentOfANode(precededWords, node);
+            var parent = FindParentOfANode(precededWords);
             InsertNodeUnderItsParent(node, parent);
         }
 
-        function FindParentOfANode(precededNodesList, node) {   //FindParentOfANode(["service", "timestamp"], 'log')
+        function FindParentOfANode(precededNodesList) {   //FindParentOfANode(["interface", "GigabitEthernet"])  for '0/0/0'
             var parent = rootConfig
             var index = 0;
             while (index < precededNodesList.length) {

@@ -29,25 +29,22 @@
                         </label>
                     </div> -->
 
-                    <select id="select1" class="form-control" onchange="PopulateSelect2BaseOnSelect1Option()">
+                    <select id="select1" class="form-control" onchange="PopulateSelects('select1')">
 
                     </select>
 
-                    <select id="select2" class="form-control">
+                    <select id="select2" class="form-control" onchange="PopulateSelects('select2')">
 
                     </select>
 
-                    <select id="select3" class="form-control">
+                    <select id="select3" class="form-control" onchange="PopulateSelects('select3')">
 
                     </select>
 
-                    <select id="select4" class="form-control">
+                    <select id="select4" class="form-control" onchange="PopulateSelects('select4')">
 
                     </select>
 
-                    <select id="select5" class="form-control">
-
-                    </select>
 
                     <button type="button" class="btn btn-primary">Show</button>
 
@@ -124,11 +121,12 @@
                 rootConfig = SortNodeChildsBaseOnPreferedItems(rootConfig, preferedItems);
 
                 //Populate Select 1 with FirstWords
-                ResetElement("select1");
-                var sortedFirstWords = ChildrenValuesInString(rootConfig);
-                PopulateFirstSelect(sortedFirstWords);
-                PopulateSelect2BaseOnSelect1Option();
-
+                // ResetElement("select1");
+                // var sortedFirstWords = ChildrenValuesInString(rootConfig);
+                // PopulateFirstSelect(sortedFirstWords);
+                // PopulateSelects("select1", rootConfig);
+                // PopulateSelect2BaseOnSelect1Option("select1");
+                PopulateSelects("select1");
 
                 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -182,27 +180,92 @@
         }
 
         // Give string array to a Select to populate its options.
-        function PopulateFirstSelect(firstWordsList) {
-            var firstSelect = document.getElementById("select1");
-            for (var i = 0; i < firstWordsList.length; i++) {
-                var option = document.createElement("OPTION");
-                var item = document.createTextNode(firstWordsList[i]);
-                option.appendChild(item);
-                option.setAttribute("value", firstWordsList[i]);
-                firstSelect.insertBefore(option, firstSelect.lastChild);
-            }
-        }
-
-        function PopulateSelect(selectId, list) {
-            var thisSelect = document.getElementById(selectId);
+        function PopulateSelect(selectId, node) {
+            ResetElement(selectId);
+            var list = ChildrenValuesInString(node);
+            var firstSelect = document.getElementById(selectId);
             for (var i = 0; i < list.length; i++) {
                 var option = document.createElement("OPTION");
                 var item = document.createTextNode(list[i]);
                 option.appendChild(item);
                 option.setAttribute("value", list[i]);
-                thisSelect.insertBefore(option, thisSelect.lastChild);
+                firstSelect.insertBefore(option, firstSelect.lastChild);
             }
         }
+
+        function PopulateSelects(selectId) {
+            var thisSelectValue = document.getElementById(selectId).value;
+            var list = [];
+            switch (selectId) {
+                case "select1":
+                    ResetElement("select2");
+                    ResetElement("select3");
+                    ResetElement("select4");
+                    if (thisSelectValue == "") {
+                        PopulateSelect("select1", rootConfig);
+                        thisSelectValue = document.getElementById("select1").value;
+                    }
+                    list.push(thisSelectValue);
+                    var findedNode = LocateLastNodeInList(rootConfig, list)
+                    PopulateSelect("select2", findedNode);
+                    if(findedNode.children.length > 0) {
+                        PopulateSelects("select2");
+                    }
+                    break;
+
+                case "select2":
+                    ResetElement("select3");
+                    ResetElement("select4");
+                    var select1Value = document.getElementById("select1").value;
+                    list.push(select1Value);
+                    if (thisSelectValue == "") {
+                        break;
+                    }
+                    else {
+                        list.push(thisSelectValue);
+                        var findedNode = LocateLastNodeInList(rootConfig, list);
+                        if(findedNode.children.length > 0) {
+                            PopulateSelect("select3", findedNode);
+                            PopulateSelects("select3");
+                        }
+                    }
+                    break;
+
+                case "select3":
+                    ResetElement("select4");
+                    var select1Value = document.getElementById("select1").value;
+                    var select2Value = document.getElementById("select2").value;
+                    list.push(select1Value);
+                    list.push(select2Value);
+                    if (thisSelectValue == "") {
+                        break;
+                    }
+                    else {
+                        list.push(thisSelectValue);
+                        var findedNode = LocateLastNodeInList(rootConfig, list);
+                        if(findedNode.children.length > 0) {
+                            PopulateSelect("select4", findedNode);
+                        }
+                    }
+                    break;
+                // case select4:
+
+                //     break;
+
+                // default:
+                //     break;
+            }
+        }
+
+        // function PopulateNextSelectBaseOnTheChangeInThisOne(selectId) {
+        //     var select1Value = document.getElementById(selectId).value;
+        //     var list = [];
+        //     list.push(select1Value);
+        //     var findedNode = LocateLastNodeInList(rootConfig, list)
+        //     PopulateSelect("select2", findedNode);
+        // }
+
+
 
         function ResetElement(elementId) {
             var element = document.getElementById(elementId);
@@ -229,16 +292,7 @@
             }
         }
 
-        function PopulateSelect2BaseOnSelect1Option() {
-            var select1Value = document.getElementById("select1").value;
-            ResetElement("select2");
-            var list = [];
-            list.push(select1Value);
-            var findedNode = LocateLastNodeInList(rootConfig, list)
-            var listOfChilds = ChildrenValuesInString(findedNode);
-            PopulateSelect("select2", listOfChilds);
-            //console.log(findedNode.getChildren());
-        }
+
 
         /////////////////////// This function add words in a line of config to rootConfig tree/////////////////////////////
 

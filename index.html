@@ -36,7 +36,7 @@
                     <select id="select2" class="form-control" onchange="PopulateSelects('select2')">
 
                     </select>
-                        
+
                     <select id="select3" class="form-control" onchange="PopulateSelects('select3')">
 
                     </select>
@@ -46,7 +46,7 @@
                     </select>
 
 
-                    <button type="button" class="btn btn-primary" onclick="ShowSelectedConfig()">Show</button>
+                    <button type="button" class="btn btn-primary" onclick="GetAllSelectedOptions()">Show</button>
 
                 </form>
 
@@ -120,6 +120,7 @@
                 var preferedItems = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
                 rootConfig = SortNodeChildsBaseOnPreferedItems(rootConfig, preferedItems);
 
+                PopulateThisSelect("select1", rootConfig);
                 PopulateSelects("select1");
 
                 /////////////////////////////////////////////////////////////////////////////////////
@@ -174,9 +175,10 @@
         }
 
         // Give string array to a Select to populate its options.
-        function PopulateSelect(selectId, node) {
+        function PopulateThisSelect(selectId, node) {
             ResetElement(selectId);
             var list = ChildrenValuesInString(node);
+            list.push("");
             var firstSelect = document.getElementById(selectId);
             for (var i = 0; i < list.length; i++) {
                 var option = document.createElement("OPTION");
@@ -196,14 +198,17 @@
                     ResetElement("select3");
                     ResetElement("select4");
                     if (thisSelectValue == "") {
-                        PopulateSelect("select1", rootConfig);
-                        thisSelectValue = document.getElementById("select1").value;
+                        console.log(GetAllSelectedOptions());
+                        break;
                     }
                     list.push(thisSelectValue);
                     var findedNode = LocateLastNodeInList(rootConfig, list)
-                    PopulateSelect("select2", findedNode);
-                    if(findedNode.children.length > 0) {
+                     if (findedNode.children.length > 0) {
+                        PopulateThisSelect("select2", findedNode);
                         PopulateSelects("select2");
+                    }
+                    else {
+                        console.log(GetAllSelectedOptions());
                     }
                     break;
 
@@ -213,14 +218,18 @@
                     var select1Value = document.getElementById("select1").value;
                     list.push(select1Value);
                     if (thisSelectValue == "") {
+                        console.log(GetAllSelectedOptions());
                         break;
                     }
                     else {
                         list.push(thisSelectValue);
                         var findedNode = LocateLastNodeInList(rootConfig, list);
-                        if(findedNode.children.length > 0) {
-                            PopulateSelect("select3", findedNode);
+                        if (findedNode.children.length > 0) {
+                            PopulateThisSelect("select3", findedNode);
                             PopulateSelects("select3");
+                        }
+                        else {
+                            console.log(GetAllSelectedOptions());
                         }
                     }
                     break;
@@ -232,33 +241,53 @@
                     list.push(select1Value);
                     list.push(select2Value);
                     if (thisSelectValue == "") {
+                        console.log(GetAllSelectedOptions());
                         break;
                     }
                     else {
                         list.push(thisSelectValue);
                         var findedNode = LocateLastNodeInList(rootConfig, list);
-                        if(findedNode.children.length > 0) {
-                            PopulateSelect("select4", findedNode);
+                        if (findedNode.children.length > 0) {
+                            PopulateThisSelect("select4", findedNode);
                         }
                     }
+                    console.log(GetAllSelectedOptions());
                     break;
-                // case select4:
-
-                //     break;
+                case "select4":
+                    var select1Value = document.getElementById("select1").value;
+                    var select2Value = document.getElementById("select2").value;
+                    var select3Value = document.getElementById("select3").value;
+                    list.push(select1Value);
+                    list.push(select2Value);
+                    list.push(select3Value);
+                    if (thisSelectValue == "") {
+                        console.log(GetAllSelectedOptions());
+                        break;
+                    }
+                    else {
+                        list.push(thisSelectValue);                        
+                    }
+                    console.log(GetAllSelectedOptions());
+                    
+                    break;
 
                 // default:
                 //     break;
             }
-            
+
         }
 
         //  Show result base on selected options 
         function GetAllSelectedOptions() {
             var selectOptions = [];
-            for(i = 1; i <= 4; i++) {
+            for (i = 1; i <= 4; i++) {
                 var selectName = "select" + i;
                 var thisSelect = document.getElementById(selectName);
-                if(thisSelect.options.length) { selectOptions.push(thisSelect.value);  }
+                if (thisSelect.options.length) {
+                    if (thisSelect.value != "") {
+                        selectOptions.push(thisSelect.value);
+                    }
+                }
             }
 
             return selectOptions;

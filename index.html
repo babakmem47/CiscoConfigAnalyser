@@ -36,7 +36,7 @@
                     <select id="select2" class="form-control" onchange="PopulateSelects('select2')">
 
                     </select>
-
+                        
                     <select id="select3" class="form-control" onchange="PopulateSelects('select3')">
 
                     </select>
@@ -46,7 +46,7 @@
                     </select>
 
 
-                    <button type="button" class="btn btn-primary">Show</button>
+                    <button type="button" class="btn btn-primary" onclick="ShowSelectedConfig()">Show</button>
 
                 </form>
 
@@ -120,12 +120,6 @@
                 var preferedItems = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
                 rootConfig = SortNodeChildsBaseOnPreferedItems(rootConfig, preferedItems);
 
-                //Populate Select 1 with FirstWords
-                // ResetElement("select1");
-                // var sortedFirstWords = ChildrenValuesInString(rootConfig);
-                // PopulateFirstSelect(sortedFirstWords);
-                // PopulateSelects("select1", rootConfig);
-                // PopulateSelect2BaseOnSelect1Option("select1");
                 PopulateSelects("select1");
 
                 /////////////////////////////////////////////////////////////////////////////////////
@@ -255,15 +249,20 @@
                 // default:
                 //     break;
             }
+            
         }
 
-        // function PopulateNextSelectBaseOnTheChangeInThisOne(selectId) {
-        //     var select1Value = document.getElementById(selectId).value;
-        //     var list = [];
-        //     list.push(select1Value);
-        //     var findedNode = LocateLastNodeInList(rootConfig, list)
-        //     PopulateSelect("select2", findedNode);
-        // }
+        //  Show result base on selected options 
+        function GetAllSelectedOptions() {
+            var selectOptions = [];
+            for(i = 1; i <= 4; i++) {
+                var selectName = "select" + i;
+                var thisSelect = document.getElementById(selectName);
+                if(thisSelect.options.length) { selectOptions.push(thisSelect.value);  }
+            }
+
+            return selectOptions;
+        }
 
 
 

@@ -85,6 +85,7 @@
     <script>
 
         var rootConfig = new Node('rootConfig');
+        var subConfigs = [];
 
         function Node(value) {
 
@@ -130,6 +131,8 @@
 
                 // reset config tree
                 rootConfig.removeChildren();
+                
+                subConfigs = [];
 
                 var linesOfConfig = document.getElementById("textarea1").value.split("\n");
                 CheckEveryLinesOfRawConfig(linesOfConfig);
@@ -139,7 +142,7 @@
 
                 PopulateThisSelect("select1", rootConfig);
                 PopulateSelects("select1");
-
+                autocomplete(document.getElementById("myInput"), subConfigs);
                 /////////////////////////////////////////////////////////////////////////////////////
 
             };
@@ -157,6 +160,25 @@
 
                 var wordsInThisLine = thisLineOfConfig.split(" ");
                 AddThisLineToConfigTree(wordsInThisLine);
+                
+                j = i+1;
+                var nextLine = linesOfConfig[j];
+                while(nextLine.charAt(0) === " ") {
+                    nextLine = nextLine.substr(1, nextLine.length);
+                    if(nextLine.length > 1) {
+                        var isAlreadyInList = false;
+                        for(var x = 0; x < subConfigs.length; x++) {
+                            if(nextLine == subConfigs[x]) {
+                                isAlreadyInList = true;
+                            }
+                        }
+                        if(isAlreadyInList == false) {
+                            subConfigs.push(nextLine);
+                        }
+                    }                    
+                    j++;
+                    nextLine = linesOfConfig[j];                    
+                }
             }
         }
 
@@ -580,8 +602,8 @@
             });
         }
         
-        var subConfigs = ["tunnel source", "tunnel destination", "ip address"];
-        autocomplete(document.getElementById("myInput"), subConfigs);
+        //var subConfigs = ["tunnel source", "tunnel destination", "ip address"];
+        //autocomplete(document.getElementById("myInput"), subConfigs);
 
         /////////////////////////////////////// end of script for autocomplete text input //////////////////    
 

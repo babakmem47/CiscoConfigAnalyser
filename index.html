@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.css" rel="stylesheet">
 
     <title>Document</title>
 </head>
@@ -46,10 +46,27 @@
                     </select>
 
 
-                    <button type="button" class="btn btn-primary" onclick="GetAllSelectedOptions()">Show</button>
+                    <button type="button" class="btn btn-primary" onclick="ShowResultBasedOnSelectedOptions()">Show</button>
 
                 </form>
+                <!-- <br> -->
+                <!-- <form class="form-inline">
+                    <div class="form-group">
+                        <label for="SubConfig">SubConfig must Contain: </label>
+                        <input type="text" class="form-control" id="SubConfigInput" placeholder="input text here..."> 
+                    </div>
+                </form> -->
+                <form autocomplete="off">
+                    <!-- I remove: action="/action_page.php" -->
+                    <div class="autocomplete" style="width:300px;">
+                        <!-- <label for="myInput">SubConfig must Contain: </label> -->
+                        <input id="myInput" type="text" name="subConfig" placeholder="Sub Config">
+                    </div>
+                    <!-- <input type="submit"> -->
+                </form>
 
+                <br>
+                <textarea id="textarea2" class="form-control" rows="28" columns="20"></textarea>
                 <!-- <button id="button2" class="btn btn-default" onclick="PopulateFirstSelect(['interface', 'ip', 'controller'])">PopulateSelect1</button>
                 <button id="button3" class="btn btn-default" onclick="ResetElement('select1')">ResetElement</button>
                 <button id="button4" class="btn btn-default" onclick="ClearOptions('select1')">ClearOptions</button>
@@ -189,6 +206,23 @@
             }
         }
 
+        // function PopulateSelects() {
+        //     var selectsOptionList = GetAllSelectedOptions();
+        //     for(var i = 0; i < GetAllSelectedOptions.length; i++) {
+        //         var thisValue = selectsOptionList[i];
+        //         if(thisValue == "") {
+        //             for(var j = i+1; j <= 4; j++){
+        //                 var selectName = "select" + j;
+        //                 ResetElement(selectName);
+        //             }
+        //         }
+
+
+        //     }
+        //     var selectName = "select" + i;
+        //     var 
+        // }
+
         function PopulateSelects(selectId) {
             var thisSelectValue = document.getElementById(selectId).value;
             var list = [];
@@ -203,7 +237,7 @@
                     }
                     list.push(thisSelectValue);
                     var findedNode = LocateLastNodeInList(rootConfig, list)
-                     if (findedNode.children.length > 0) {
+                    if (findedNode.children.length > 0) {
                         PopulateThisSelect("select2", findedNode);
                         PopulateSelects("select2");
                     }
@@ -265,10 +299,10 @@
                         break;
                     }
                     else {
-                        list.push(thisSelectValue);                        
+                        list.push(thisSelectValue);
                     }
                     console.log(GetAllSelectedOptions());
-                    
+
                     break;
 
                 // default:
@@ -293,7 +327,44 @@
             return selectOptions;
         }
 
+        function ShowResultBasedOnSelectedOptions() {
+            var listOfSelectedOptions = GetAllSelectedOptions();
+            var wantedContext = "";
+            if (listOfSelectedOptions[0] == "interface") {
+                wantedContext = "interface "
+                for (var i = 1; i < listOfSelectedOptions.length; i++) {
+                    wantedContext += listOfSelectedOptions[i];
+                }
+            }
+            else {
+                wantedContext = listOfSelectedOptions.join(" ");
+            }
+            var linesOfConfig = document.getElementById("textarea1").value.split("\n");
+            var searchResult = [];
+            var i = 0;
+            while (i < linesOfConfig.length) {
+                var thisLine = linesOfConfig[i];
+                if (thisLine.length == 0) { i++; continue; }
+                if (thisLine.charAt(0) === "!" || thisLine.charAt(0) === " ") { i++; continue; }
+                if (thisLine.includes(wantedContext)) {
+                    searchResult.push(thisLine);
+                    i++;
+                    var nextline = linesOfConfig[i];
+                    while (nextline.charAt(0) == " ") {
+                        searchResult.push(nextline);
+                        i++;
+                        nextline = linesOfConfig[i];
+                    }
+                    searchResult.push("!");
+                    continue;
 
+                }
+                i++;
+            }
+            var resultline = searchResult.join("\n");
+            document.getElementById("textarea2").innerHTML = resultline;
+            //console.log("Show Btn:" + searchResult);
+        }
 
         function ResetElement(elementId) {
             var element = document.getElementById(elementId);
@@ -410,6 +481,109 @@
         }
         ///////////////////////////////////// end of functions that add nodes to tree of config ////////////
 
+
+        //////////////////////////////////////  script for autocomplete text input /////////////////////////
+        function autocomplete(inp, arr) {
+            /*the autocomplete function takes two arguments,
+            the text field element and an array of possible autocompleted values:*/
+            var currentFocus;
+            /*execute a function when someone writes in the text field:*/
+            inp.addEventListener("input", function (e) {
+                var a, b, i, val = this.value;
+                /*close any already open lists of autocompleted values*/
+                closeAllLists();
+                if (!val) { return false; }
+                currentFocus = -1;
+                /*create a DIV element that will contain the items (values):*/
+                a = document.createElement("DIV");
+                a.setAttribute("id", this.id + "autocomplete-list");
+                a.setAttribute("class", "autocomplete-items");
+                /*append the DIV element as a child of the autocomplete container:*/
+                this.parentNode.appendChild(a);
+                /*for each item in the array...*/
+                for (i = 0; i < arr.length; i++) {
+                    /*check if the item starts with the same letters as the text field value:*/
+                    if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                        /*create a DIV element for each matching element:*/
+                        b = document.createElement("DIV");
+                        /*make the matching letters bold:*/
+                        b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+                        b.innerHTML += arr[i].substr(val.length);
+                        /*insert a input field that will hold the current array item's value:*/
+                        b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                        /*execute a function when someone clicks on the item value (DIV element):*/
+                        b.addEventListener("click", function (e) {
+                            /*insert the value for the autocomplete text field:*/
+                            inp.value = this.getElementsByTagName("input")[0].value;
+                            /*close the list of autocompleted values,
+                            (or any other open lists of autocompleted values:*/
+                            closeAllLists();
+                        });
+                        a.appendChild(b);
+                    }
+                }
+            });
+            /*execute a function presses a key on the keyboard:*/
+            inp.addEventListener("keydown", function (e) {
+                var x = document.getElementById(this.id + "autocomplete-list");
+                if (x) x = x.getElementsByTagName("div");
+                if (e.keyCode == 40) {
+                    /*If the arrow DOWN key is pressed,
+                    increase the currentFocus variable:*/
+                    currentFocus++;
+                    /*and and make the current item more visible:*/
+                    addActive(x);
+                } else if (e.keyCode == 38) { //up
+                    /*If the arrow UP key is pressed,
+                    decrease the currentFocus variable:*/
+                    currentFocus--;
+                    /*and and make the current item more visible:*/
+                    addActive(x);
+                } else if (e.keyCode == 13) {
+                    /*If the ENTER key is pressed, prevent the form from being submitted,*/
+                    e.preventDefault();
+                    if (currentFocus > -1) {
+                        /*and simulate a click on the "active" item:*/
+                        if (x) x[currentFocus].click();
+                    }
+                }
+            });
+            function addActive(x) {
+                /*a function to classify an item as "active":*/
+                if (!x) return false;
+                /*start by removing the "active" class on all items:*/
+                removeActive(x);
+                if (currentFocus >= x.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = (x.length - 1);
+                /*add class "autocomplete-active":*/
+                x[currentFocus].classList.add("autocomplete-active");
+            }
+            function removeActive(x) {
+                /*a function to remove the "active" class from all autocomplete items:*/
+                for (var i = 0; i < x.length; i++) {
+                    x[i].classList.remove("autocomplete-active");
+                }
+            }
+            function closeAllLists(elmnt) {
+                /*close all autocomplete lists in the document,
+                except the one passed as an argument:*/
+                var x = document.getElementsByClassName("autocomplete-items");
+                for (var i = 0; i < x.length; i++) {
+                    if (elmnt != x[i] && elmnt != inp) {
+                        x[i].parentNode.removeChild(x[i]);
+                    }
+                }
+            }
+            /*execute a function when someone clicks in the document:*/
+            document.addEventListener("click", function (e) {
+                closeAllLists(e.target);
+            });
+        }
+        
+        var subConfigs = ["tunnel source", "tunnel destination", "ip address"];
+        autocomplete(document.getElementById("myInput"), subConfigs);
+
+        /////////////////////////////////////// end of script for autocomplete text input //////////////////    
 
 
 

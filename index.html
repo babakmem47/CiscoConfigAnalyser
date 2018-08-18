@@ -67,6 +67,9 @@
 
                 <br>
                 <textarea id="textarea2" class="form-control" rows="28" columns="20"></textarea>
+                <div id="counterDiv">
+
+                </div>
                 <!-- <button id="button2" class="btn btn-default" onclick="PopulateFirstSelect(['interface', 'ip', 'controller'])">PopulateSelect1</button>
                 <button id="button3" class="btn btn-default" onclick="ResetElement('select1')">ResetElement</button>
                 <button id="button4" class="btn btn-default" onclick="ClearOptions('select1')">ClearOptions</button>
@@ -131,7 +134,7 @@
 
                 // reset config tree
                 rootConfig.removeChildren();
-                
+
                 subConfigs = [];
 
                 var linesOfConfig = document.getElementById("textarea1").value.split("\n");
@@ -160,24 +163,24 @@
 
                 var wordsInThisLine = thisLineOfConfig.split(" ");
                 AddThisLineToConfigTree(wordsInThisLine);
-                
-                j = i+1;
+
+                j = i + 1;
                 var nextLine = linesOfConfig[j];
-                while(nextLine.charAt(0) === " ") {
+                while (nextLine.charAt(0) === " ") {
                     nextLine = nextLine.substr(1, nextLine.length);
-                    if(nextLine.length > 1) {
+                    if (nextLine.length > 1) {
                         var isAlreadyInList = false;
-                        for(var x = 0; x < subConfigs.length; x++) {
-                            if(nextLine == subConfigs[x]) {
+                        for (var x = 0; x < subConfigs.length; x++) {
+                            if (nextLine == subConfigs[x]) {
                                 isAlreadyInList = true;
                             }
                         }
-                        if(isAlreadyInList == false) {
+                        if (isAlreadyInList == false) {
                             subConfigs.push(nextLine);
                         }
-                    }                    
+                    }
                     j++;
-                    nextLine = linesOfConfig[j];                    
+                    nextLine = linesOfConfig[j];
                 }
             }
         }
@@ -362,29 +365,49 @@
                 wantedContext = listOfSelectedOptions.join(" ");
             }
             var linesOfConfig = document.getElementById("textarea1").value.split("\n");
+            var subCfg = document.getElementById("myInput").value;
             var searchResult = [];
+            var counter = 0;
             var i = 0;
             while (i < linesOfConfig.length) {
                 var thisLine = linesOfConfig[i];
                 if (thisLine.length == 0) { i++; continue; }
                 if (thisLine.charAt(0) === "!" || thisLine.charAt(0) === " ") { i++; continue; }
+                var isInSubConfig = false;
+                var pushedItems = 0;
                 if (thisLine.includes(wantedContext)) {
                     searchResult.push(thisLine);
+                    counter++;
+                    pushedItems++;
                     i++;
                     var nextline = linesOfConfig[i];
                     while (nextline.charAt(0) == " ") {
                         searchResult.push(nextline);
+                        pushedItems++;
                         i++;
+                        if (nextline.includes(subCfg)) {
+                            isInSubConfig = true;
+                        }
                         nextline = linesOfConfig[i];
                     }
                     searchResult.push("!");
+                    pushedItems++;
+                    if (subCfg == "") {
+                        // do nothing 
+                    }
+                    else if (subCfg.length > 0 && isInSubConfig == false) {
+                        for (var j = 0; j < pushedItems; j++) {
+                            searchResult.pop();
+                        }
+                        counter--;
+                    }
                     continue;
-
                 }
                 i++;
             }
             var resultline = searchResult.join("\n");
             document.getElementById("textarea2").innerHTML = resultline;
+            document.getElementById("counterDiv").innerHTML = counter;
             //console.log("Show Btn:" + searchResult);
         }
 
@@ -601,7 +624,7 @@
                 closeAllLists(e.target);
             });
         }
-        
+
         //var subConfigs = ["tunnel source", "tunnel destination", "ip address"];
         //autocomplete(document.getElementById("myInput"), subConfigs);
 

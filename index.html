@@ -156,8 +156,7 @@
 
         function CheckEveryLinesOfRawConfig(linesOfConfig) {
             var firstWordsList = [];
-            var linesOfConfigLength = linesOfConfig.length;
-            for (var i = 0; i < linesOfConfigLength; i++) {
+            for (var i = 0; i < linesOfConfig.length; i++) {
                 var thisLineOfConfig = linesOfConfig[i];
                 if (thisLineOfConfig.length == 0) { continue; }
                 if (thisLineOfConfig.charAt(0) === "!" || thisLineOfConfig.charAt(0) === " ") { continue; }
@@ -167,14 +166,11 @@
 
                 j = i + 1;
                 var nextLine = linesOfConfig[j];
-                var nextLineLength = nextLine.length;
                 while (nextLine.charAt(0) === " ") {
-                    nextLine = nextLine.substr(1, nextLineLength);
-                    nextLineLength = nextLine.length;
-                    if (nextLineLength > 1) {
+                    nextLine = nextLine.substr(1, nextLine.length);
+                    if (nextLine.length > 1) {
                         var isAlreadyInList = false;
-                        var subCfgLength = subConfigs.length;
-                        for (var x = 0; x < subCfgLength; x++) {
+                        for (var x = 0; x < subConfigs.length; x++) {
                             if (nextLine == subConfigs[x]) {
                                 isAlreadyInList = true;
                             }
@@ -191,8 +187,7 @@
 
         function ChildrenValuesInString(node) {
             var childsValues = [];
-            var nodeChildrenLength = node.children.length;
-            for (i = 0; i < nodeChildrenLength; i++) {
+            for (i = 0; i < node.children.length; i++) {
                 childsValues.push(node.children[i].value);
             }
 
@@ -202,12 +197,10 @@
         function SortNodeChildsBaseOnPreferedItems(node, prefItems) {
             var i = 0;
             var index = 0;
-            var prefItemsLength = prefItems.length
-            while (i < prefItemsLength) {
+            while (i < prefItems.length) {
                 var item = prefItems[i];
                 var j = 0;
-                var nodeChildrenLength = node.children.length;
-                while (j < nodeChildrenLength) {
+                while (j < node.children.length) {
                     if (item == node.children[j].value) {
                         var temp = node.children[index];
                         node.children[index] = node.children[j];
@@ -229,8 +222,7 @@
             var list = ChildrenValuesInString(node);
             list.push("");
             var firstSelect = document.getElementById(selectId);
-            var listLength = list.length;
-            for (var i = 0; i < listLength; i++) {
+            for (var i = 0; i < list.length; i++) {
                 var option = document.createElement("OPTION");
                 var item = document.createTextNode(list[i]);
                 option.appendChild(item);
@@ -364,9 +356,8 @@
             var listOfSelectedOptions = GetAllSelectedOptions();
             var wantedContext = "";
             if (listOfSelectedOptions[0] == "interface") {
-                wantedContext = "interface ";
-                var listOfSelectedOptionsLength = listOfSelectedOptions.length;
-                for (var i = 1; i < listOfSelectedOptionsLength; i++) {
+                wantedContext = "interface "
+                for (var i = 1; i < listOfSelectedOptions.length; i++) {
                     wantedContext += listOfSelectedOptions[i];
                 }
             }
@@ -378,8 +369,7 @@
             var searchResult = [];
             var counter = 0;
             var i = 0;
-            var linesOfConfigLength = linesOfConfig.length;
-            while (i < linesOfConfigLength) {
+            while (i < linesOfConfig.length) {
                 var thisLine = linesOfConfig[i];
                 if (thisLine.length == 0) { i++; continue; }
                 if (thisLine.charAt(0) === "!" || thisLine.charAt(0) === " ") { i++; continue; }
@@ -453,8 +443,7 @@
         function AddThisLineToConfigTree(wordsInThisLine) {
             var precededWords = [];
             wordsInThisLine = DivideInterfacesIntoSubString(wordsInThisLine);
-            var wordsInThisLineLength = wordsInThisLine.length;
-            for (var i = 0; i < wordsInThisLineLength; i++) {
+            for (var i = 0; i < wordsInThisLine.length; i++) {
                 AddNode(precededWords, wordsInThisLine[i])
                 precededWords.push(wordsInThisLine[i]);
             }
@@ -468,11 +457,9 @@
         function LocateLastNodeInList(startNode, precededNodesList) {   // LocateLastNodeInList(startNode, ["service", "timestamp"])
             var lastNode = startNode
             var index = 0;
-            var precededNodesListLength = precededNodesList.length;
-            while (index < precededNodesListLength) {
+            while (index < precededNodesList.length) {
                 var childs = lastNode.children;
-                var childsLength = childs.length;
-                for (var i = 0; i < childsLength; i++) {
+                for (var i = 0; i < childs.length; i++) {
                     if (childs[i].value == precededNodesList[index]) {
                         lastNode = childs[i];
                         index++;
@@ -489,8 +476,7 @@
         function InsertNodeUnderItsParent(node, parent) {
             var childsOfParent = parent.children;
             var isBetweenChildsAlready = false;
-            var childsOfParentLength = childsOfParent.length;
-            for (i = 0; i < childsOfParentLength; i++) {
+            for (i = 0; i < childsOfParent.length; i++) {
                 if (node == parent.children[i].value) {
                     isBetweenChildsAlready = true;
                     break;
@@ -505,13 +491,12 @@
         function DivideInterfacesIntoSubString(wordsInThisLine) {
             var thisLineOfCode = [];
             thisLineOfCode.push(wordsInThisLine[0]);
-            var wordsInThisLineLength = wordsInThisLine.length;
-            for (var i = 1; i < wordsInThisLineLength; i++) {
+
+            for (var i = 1; i < wordsInThisLine.length; i++) {
                 var word = wordsInThisLine[i];
                 var j = 0;
                 var findDigit = false;
-                var wordLength =  word.length;
-                while (j < wordLength) {
+                while (j < word.length) {
                     if (word.charCodeAt(j) >= 48 && word.charCodeAt(j) <= 57) {
                         if (word.charCodeAt(j - 1) >= 65 && word.charCodeAt(j - 1) <= 122) {
                             findDigit = true;
@@ -561,8 +546,7 @@
                 /*append the DIV element as a child of the autocomplete container:*/
                 this.parentNode.appendChild(a);
                 /*for each item in the array...*/
-                var arrLength = arr.length;
-                for (i = 0; i < arrLength; i++) {
+                for (i = 0; i < arr.length; i++) {
                     /*check if the item starts with the same letters as the text field value:*/
                     if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
                         /*create a DIV element for each matching element:*/
@@ -621,8 +605,7 @@
             }
             function removeActive(x) {
                 /*a function to remove the "active" class from all autocomplete items:*/
-                var xLength = x.length;
-                for (var i = 0; i < xLength; i++) {
+                for (var i = 0; i < x.length; i++) {
                     x[i].classList.remove("autocomplete-active");
                 }
             }
@@ -630,8 +613,7 @@
                 /*close all autocomplete lists in the document,
                 except the one passed as an argument:*/
                 var x = document.getElementsByClassName("autocomplete-items");
-                var xLength = x.length;
-                for (var i = 0; i < xLength; i++) {
+                for (var i = 0; i < x.length; i++) {
                     if (elmnt != x[i] && elmnt != inp) {
                         x[i].parentNode.removeChild(x[i]);
                     }

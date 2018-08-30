@@ -11,7 +11,7 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-xs-6 col-lg-6">
                 <div class="form-group">
@@ -56,11 +56,12 @@
                         <input type="text" class="form-control" id="SubConfigInput" placeholder="input text here..."> 
                     </div>
                 </form> -->
-                <form autocomplete="off">
+                <form class="form-inline"  autocomplete="off">
                     <!-- I remove: action="/action_page.php" -->
+                    <label for="myInput"> Show those that have: </label>
                     <div class="autocomplete" style="width:300px;">
                         <!-- <label for="myInput">SubConfig must Contain: </label> -->
-                        <input id="myInput" type="text" name="subConfig" placeholder="Sub Config">
+                       <input id="myInput" type="text" name="subConfig" placeholder="Sub Config">
                     </div>
                     <!-- <input type="submit"> -->
                 </form>
@@ -70,6 +71,9 @@
                 <div id="counterDiv">
 
                 </div>
+                <br>
+                <button id="ShowRelCfg" class="btn btn-info" onclick="ShowRelatedConfig()">Show Related Config</button>
+
                 <!-- <button id="button2" class="btn btn-default" onclick="PopulateFirstSelect(['interface', 'ip', 'controller'])">PopulateSelect1</button>
                 <button id="button3" class="btn btn-default" onclick="ResetElement('select1')">ResetElement</button>
                 <button id="button4" class="btn btn-default" onclick="ClearOptions('select1')">ClearOptions</button>

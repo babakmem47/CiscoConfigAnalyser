@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+</head>
+
+<body>
+    <div id="header">Test2</div>
+    <textarea id="textarea">Put this on the popup page</textarea>
+    <button onclick="OpenWindow()">Open Windows</button>
+
+
+    <script>
+        function OpenWindow() {
+            var myWindow = window.open("", "", "top=100,left=400,width=500,height=700");
+            var routeLine = "0.0.0.0 0.0.0.0 10.200.0.18";
+            var routeLine2 = "172.16.42.0 255.255.255.0 10.200.0.18";
+            var linesOfIpRoutes = "ip route " + routeLine + "<br>";
+            var linesOfIpRoutes = linesOfIpRoutes + "ip route " + routeLine2 + "<br>";
+
+            var content = "<html>\
+                              <head>\
+                              </head>\
+                                 <body style='font-family: monospace;'>\
+                                    <h2>Related routes:</h2>" + linesOfIpRoutes + 
+                                 "<body>\
+                            </html>";
+            
+            
+            myWindow.document.write(content);
+        }
+        
+    </script>
+
+</body>
+
+<!-- <script>
+        document.querySelector('button').onclick = function () {
+            var content = document.querySelector('textarea').innerHTML;
+
+            var popupWin = window.open('', '_blank', 'width="100%",height="100%"');
+            if (popupWin) {
+                console.log('Popup was blocked');
+                return false;
+            }
+            // popupWin.document.write('<html><head><link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css"></head><body>' + content + '</body></html>');
+            popupWin.document.body.setAttribute('style', 'font-family: "Open Sans" !important');
+            setTimeout(function () {
+                popupWin.document.close();
+                // popupWin.print();
+                popupWin.close();
+            }, 2000);
+        };  
+    </script> -->
+
+</html>

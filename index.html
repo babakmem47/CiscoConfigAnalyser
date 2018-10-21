@@ -59,15 +59,40 @@
                         <input type="text" class="form-control" id="SubConfigInput" placeholder="input text here..."> 
                     </div>
                 </form> -->
+                <br/>    
                 <form class="form-inline"  autocomplete="off">
                     <!-- I remove: action="/action_page.php" -->
-                    <label for="myInput"> Show those that have: </label>
-                    <div class="autocomplete" style="width:300px;">
+                    <label for="myInput">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; That &nbsp</label>
+                    <select class="form-control" id="HaveNotHave1">
+                        <option>Have</option>
+                        <option>Not Have</option>
+                    </select>
+                    
+                    <div class="autocomplete" style="width:400px;">
                         <!-- <label for="myInput">SubConfig must Contain: </label> -->
-                       <input id="myInput" type="text" name="subConfig" placeholder="Sub Config">
+                       <input id="myInput" type="text" name="subConfig" placeholder="Write something ...">
                     </div>
                     <!-- <input type="submit"> -->
                 </form>
+                <br/>
+                <form class="form-inline"  autocomplete="off">
+                    <!-- I remove: action="/action_page.php" -->
+                    <select class="form-control" id="HaveNotHave1">
+                        <option>AND</option>
+                        <option>OR</option>
+                    </select>
+                    <select class="form-control" id="HaveNotHave1">
+                        <option>Have</option>
+                        <option>Not Have</option>
+                    </select>
+                                        
+                    <div class="autocomplete" style="width:400px;">
+                        <!-- <label for="myInput">SubConfig must Contain: </label> -->
+                       <input id="myInput2" type="text" name="subConfig2" placeholder="Write something ...">
+                    </div>
+                    <!-- <input type="submit"> -->
+                </form>
+
 
                 <br>
                 <textarea id="textarea2" class="form-control" rows="28" columns="20"></textarea>

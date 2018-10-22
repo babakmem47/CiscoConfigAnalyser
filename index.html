@@ -61,23 +61,19 @@
                 </form> -->
                 <br/>    
                 <form class="form-inline"  autocomplete="off">
-                    <!-- I remove: action="/action_page.php" -->
-                    <label for="myInput">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; That &nbsp</label>
-                    <select class="form-control" id="HaveNotHave1">
+                    <label for="myInput">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  That &nbsp</label>
+                    <select class="form-control" style="width: auto;" id="HaveNotHave1">
                         <option>Have</option>
                         <option>Not Have</option>
                     </select>
                     
                     <div class="autocomplete" style="width:400px;">
-                        <!-- <label for="myInput">SubConfig must Contain: </label> -->
-                       <input id="myInput" type="text" name="subConfig" placeholder="Write something ...">
+                       <input id="myInput" class="input-sm" type="text" name="subConfig" placeholder="Write something ...">
                     </div>
-                    <!-- <input type="submit"> -->
                 </form>
-                <br/>
+                
                 <form class="form-inline"  autocomplete="off">
-                    <!-- I remove: action="/action_page.php" -->
-                    <select class="form-control" id="HaveNotHave1">
+                    <select class="form-control" id="ANDOR1">
                         <option>AND</option>
                         <option>OR</option>
                     </select>
@@ -87,8 +83,24 @@
                     </select>
                                         
                     <div class="autocomplete" style="width:400px;">
+                       <input id="myInput2" class="input-sm" type="text" name="subConfig2" placeholder="Write something ...">
+                    </div>
+                </form>
+
+                <form class="form-inline"  autocomplete="off">
+                    <!-- I remove: action="/action_page.php" -->
+                    <select class="form-control" id="ANDOR2">
+                        <option>AND</option>
+                        <option>OR</option>
+                    </select>
+                    <select class="form-control" id="HaveNotHave2">
+                        <option>Have</option>
+                        <option>Not Have</option>
+                    </select>
+                                        
+                    <div class="autocomplete" style="width:400px;">
                         <!-- <label for="myInput">SubConfig must Contain: </label> -->
-                       <input id="myInput2" type="text" name="subConfig2" placeholder="Write something ...">
+                       <input id="myInput3" class="input-sm" type="text" name="subConfig3" placeholder="Write something ...">
                     </div>
                     <!-- <input type="submit"> -->
                 </form>
@@ -170,7 +182,7 @@
                 subConfigs = [];
 
                 var linesOfConfig = document.getElementById("textarea1").value.split("\n");
-                CheckEveryLinesOfRawConfig(linesOfConfig);
+                BuildConfigTree(linesOfConfig);
                 var listOfFirstWords = ChildrenValuesInString(rootConfig);
                 var preferedItems = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
                 rootConfig = SortNodeChildsBaseOnPreferedItems(rootConfig, preferedItems);
@@ -186,7 +198,7 @@
 
         }
 
-        function CheckEveryLinesOfRawConfig(linesOfConfig) {
+        function BuildConfigTree(linesOfConfig) {
             var firstWordsList = [];
             for (var i = 0; i < linesOfConfig.length; i++) {
                 var thisLineOfConfig = linesOfConfig[i];

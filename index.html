@@ -204,7 +204,7 @@
                 var thisLineOfConfig = linesOfConfig[i];
                 if (thisLineOfConfig.length == 0) { continue; }
                 if (thisLineOfConfig.charAt(0) === "!" || thisLineOfConfig.charAt(0) === " ") { continue; }
-
+                
                 var wordsInThisLine = thisLineOfConfig.split(" ");
                 AddThisLineToConfigTree(wordsInThisLine);
 
@@ -305,7 +305,7 @@
                         break;
                     }
                     list.push(thisSelectValue);
-                    var findedNode = LocateLastNodeInList(rootConfig, list)
+                    var findedNode = LocateLastNodeInList(list)
                     if (findedNode.children.length > 0) {
                         PopulateThisSelect("select2", findedNode);
                         PopulateSelects("select2");
@@ -326,7 +326,7 @@
                     }
                     else {
                         list.push(thisSelectValue);
-                        var findedNode = LocateLastNodeInList(rootConfig, list);
+                        var findedNode = LocateLastNodeInList(list);
                         if (findedNode.children.length > 0) {
                             PopulateThisSelect("select3", findedNode);
                             PopulateSelects("select3");
@@ -349,7 +349,7 @@
                     }
                     else {
                         list.push(thisSelectValue);
-                        var findedNode = LocateLastNodeInList(rootConfig, list);
+                        var findedNode = LocateLastNodeInList(list);
                         if (findedNode.children.length > 0) {
                             PopulateThisSelect("select4", findedNode);
                         }
@@ -486,20 +486,21 @@
 
         function AddThisLineToConfigTree(wordsInThisLine) {
             var precededWords = [];
-            wordsInThisLine = DivideInterfacesIntoSubString(wordsInThisLine);
+            if (wordsInThisLine[0] == "interface")
+                wordsInThisLine = DivideInterfacesIntoSubString(wordsInThisLine);
             for (var i = 0; i < wordsInThisLine.length; i++) {
-                AddNode(precededWords, wordsInThisLine[i])
-                precededWords.push(wordsInThisLine[i]);
+                var thisNode = wordsInThisLine[i];
+                // Locate Parent And Insert This Node Under It
+                var parent = LocateLastNodeInList(precededWords);
+                InsertNodeUnderItsParent(thisNode, parent);
+                // AddNode(precededWords, thisNode)
+                precededWords.push(thisNode);
             }
         }
 
-        function AddNode(precededWords, node) {             // precededParents: words before node in a line of code
-            var parent = LocateLastNodeInList(rootConfig, precededWords);
-            InsertNodeUnderItsParent(node, parent);
-        }
 
-        function LocateLastNodeInList(startNode, precededNodesList) {   // LocateLastNodeInList(startNode, ["service", "timestamp"])
-            var lastNode = startNode
+        function LocateLastNodeInList(precededNodesList) {   // LocateLastNodeInList(startNode, ["service", "timestamp"])
+            var lastNode = rootConfig;
             var index = 0;
             while (index < precededNodesList.length) {
                 var childs = lastNode.children;
@@ -514,7 +515,6 @@
 
             return lastNode;
         }
-
 
 
         function InsertNodeUnderItsParent(node, parent) {

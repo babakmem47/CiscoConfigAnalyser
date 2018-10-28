@@ -132,7 +132,9 @@
     <script>
 
         var rootConfig = new Node('rootConfig');
+        var mainLinesInConfig = [];
         var subConfigs = [];
+
 
         function Node(value) {
 
@@ -195,7 +197,6 @@
             };
             reader.readAsText(file);
 
-
         }
 
         function BuildConfigTree(linesOfConfig) {
@@ -228,6 +229,116 @@
                 }
             }
         }
+
+/////////////////////// This function add words in a line of config to rootConfig tree/////////////////////////////
+
+        function AddThisLineToConfigTree(wordsInThisLine) {
+            if (wordsInThisLine[0] == "interface")
+                wordsInThisLine = DivideInterfacesIntoSubString(wordsInThisLine);
+            var precededWords = [];
+            var indexOfNewWord = 0;
+            // find preceded words if they exist already
+            for(var i = 0; i < mainLinesInConfig.length; i++) {
+                var thisLine = mainLinesInConfig[i].split(" ");
+                if (thisLine[0] === wordsInThisLine[0]) {
+                    precededWords+= wordsInThisLine[0];
+                    indexOfNewWord++;
+                    for (var j = 1; j < thisLine.length; j++) {
+                        if (thisLine[j] == wordsInThisLine[j]) {
+                            precededWords+= wordsInThisLine[j];
+                            // if (j < wordsInThisLine.length)
+                                indexOfNewWord++;
+                        }
+                    }
+                }
+                
+
+            }
+
+            for (var i = indexOfNewWord; i < wordsInThisLine.length; i++) {
+                var thisNode = wordsInThisLine[i];
+                // Locate Parent And Insert This Node Under It
+                var parent = LocateLastNodeInList(precededWords);
+                InsertNodeUnderItsParent(thisNode, parent);
+                // AddNode(precededWords, thisNode)
+                precededWords.push(thisNode);
+            }
+        }
+
+
+        function LocateLastNodeInList(precededNodesList) {   // LocateLastNodeInList(startNode, ["service", "timestamp"])
+            var lastNode = rootConfig;
+            var index = 0;
+            while (index < precededNodesList.length) {
+                var childs = lastNode.children;
+                for (var i = 0; i < childs.length; i++) {
+                    if (childs[i].value == precededNodesList[index]) {
+                        lastNode = childs[i];
+                        index++;
+                        break;
+                    }
+                }
+            }
+
+            return lastNode;
+        }
+
+
+        function InsertNodeUnderItsParent(node, parent) {
+            var childsOfParent = parent.children;
+            var isBetweenChildsAlready = false;
+            for (i = 0; i < childsOfParent.length; i++) {
+                if (node == parent.children[i].value) {
+                    isBetweenChildsAlready = true;
+                    break;
+                }
+            }
+            if (isBetweenChildsAlready == false) {
+                parent.addChild(new Node(node));   // First Create node and then add the created node under its parent
+                // insert line into main
+            }
+
+        }
+
+        function DivideInterfacesIntoSubString(wordsInThisLine) {
+            var thisLineOfCode = [];
+            thisLineOfCode.push(wordsInThisLine[0]);
+
+            for (var i = 1; i < wordsInThisLine.length; i++) {
+                var word = wordsInThisLine[i];
+                var j = 0;
+                var findDigit = false;
+                while (j < word.length) {
+                    if (word.charCodeAt(j) >= 48 && word.charCodeAt(j) <= 57) {
+                        if (word.charCodeAt(j - 1) >= 65 && word.charCodeAt(j - 1) <= 122) {
+                            findDigit = true;
+                            thisLineOfCode.push(word.substring(0, j));
+                            word = word.substring(j, word.length);
+                            var indexOfdot = word.indexOf(".");
+                            if (indexOfdot == -1) {
+                                thisLineOfCode.push(word);
+                            }
+                            else {
+                                thisLineOfCode.push(word.substring(0, indexOfdot));
+                                thisLineOfCode.push(word.substring(indexOfdot, word.length));
+                            }
+
+                            break;
+                        }
+                    }
+                    j++;
+
+                }
+
+                if (findDigit == false) {
+                    thisLineOfCode.push(word);
+                }
+            }
+            return thisLineOfCode
+        }
+        ///////////////////////////////////// end of functions that add nodes to tree of config ////////////
+
+
 
         function ChildrenValuesInString(node) {
             var childsValues = [];
@@ -479,97 +590,7 @@
                 i++;
             }
         }
-
-
-
-        /////////////////////// This function add words in a line of config to rootConfig tree/////////////////////////////
-
-        function AddThisLineToConfigTree(wordsInThisLine) {
-            var precededWords = [];
-            if (wordsInThisLine[0] == "interface")
-                wordsInThisLine = DivideInterfacesIntoSubString(wordsInThisLine);
-            for (var i = 0; i < wordsInThisLine.length; i++) {
-                var thisNode = wordsInThisLine[i];
-                // Locate Parent And Insert This Node Under It
-                var parent = LocateLastNodeInList(precededWords);
-                InsertNodeUnderItsParent(thisNode, parent);
-                // AddNode(precededWords, thisNode)
-                precededWords.push(thisNode);
-            }
-        }
-
-
-        function LocateLastNodeInList(precededNodesList) {   // LocateLastNodeInList(startNode, ["service", "timestamp"])
-            var lastNode = rootConfig;
-            var index = 0;
-            while (index < precededNodesList.length) {
-                var childs = lastNode.children;
-                for (var i = 0; i < childs.length; i++) {
-                    if (childs[i].value == precededNodesList[index]) {
-                        lastNode = childs[i];
-                        index++;
-                        break;
-                    }
-                }
-            }
-
-            return lastNode;
-        }
-
-
-        function InsertNodeUnderItsParent(node, parent) {
-            var childsOfParent = parent.children;
-            var isBetweenChildsAlready = false;
-            for (i = 0; i < childsOfParent.length; i++) {
-                if (node == parent.children[i].value) {
-                    isBetweenChildsAlready = true;
-                    break;
-                }
-            }
-            if (isBetweenChildsAlready == false) {
-                parent.addChild(new Node(node));
-            }
-
-        }
-
-        function DivideInterfacesIntoSubString(wordsInThisLine) {
-            var thisLineOfCode = [];
-            thisLineOfCode.push(wordsInThisLine[0]);
-
-            for (var i = 1; i < wordsInThisLine.length; i++) {
-                var word = wordsInThisLine[i];
-                var j = 0;
-                var findDigit = false;
-                while (j < word.length) {
-                    if (word.charCodeAt(j) >= 48 && word.charCodeAt(j) <= 57) {
-                        if (word.charCodeAt(j - 1) >= 65 && word.charCodeAt(j - 1) <= 122) {
-                            findDigit = true;
-                            thisLineOfCode.push(word.substring(0, j));
-                            word = word.substring(j, word.length);
-                            var indexOfdot = word.indexOf(".");
-                            if (indexOfdot == -1) {
-                                thisLineOfCode.push(word);
-                            }
-                            else {
-                                thisLineOfCode.push(word.substring(0, indexOfdot));
-                                thisLineOfCode.push(word.substring(indexOfdot, word.length));
-                            }
-
-                            break;
-                        }
-                    }
-                    j++;
-
-                }
-
-                if (findDigit == false) {
-                    thisLineOfCode.push(word);
-                }
-            }
-            return thisLineOfCode
-        }
-        ///////////////////////////////////// end of functions that add nodes to tree of config ////////////
-
+        
 
         //////////////////////////////////////  script for autocomplete text input /////////////////////////
         function autocomplete(inp, arr) {

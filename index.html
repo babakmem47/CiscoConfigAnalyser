@@ -132,8 +132,11 @@
     <script>
 
         var rootConfig = new Node('rootConfig');
-        var PreviousMainLinesOfConfig = [];
-        var subConfigs = [];
+        var mainLines = [];
+        var PreviousMainLineOfConfig = [];
+        var subConfigForInput1 = [];
+        var subConfigForInput2 = [];
+        var subConfigForInput3 = [];
 
 
         function Node(value) {
@@ -181,17 +184,24 @@
                 // reset config tree
                 rootConfig.removeChildren();
 
-                subConfigs = [];
-
+                
                 var linesOfConfig = document.getElementById("textarea1").value.split("\n");
                 BuildConfigTree(linesOfConfig);
+
+                
                 var listOfFirstWords = ChildrenValuesInString(rootConfig);
                 var preferedItems = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
                 rootConfig = SortNodeChildsBaseOnPreferedItems(rootConfig, preferedItems);
 
                 PopulateThisSelect("select1", rootConfig);
                 PopulateSelects("select1");
-                autocomplete(document.getElementById("myInput"), subConfigs);
+
+                subConfigForInput1 = [];
+                subConfigForInput2 = [];
+                subConfigForInput3 = [];
+                PopulateSubconfigForInputs();
+                
+                autocomplete(document.getElementById("myInput"), subConfigForInput1);
                 /////////////////////////////////////////////////////////////////////////////////////
 
             };
@@ -200,7 +210,8 @@
         }
 
         function BuildConfigTree(linesOfConfig) {
-            PreviousMainLinesOfConfig = [];
+            mainLines = [];
+            PreviousMainLineOfConfig = [];
             var firstWordsList = [];
             for (var i = 0; i < linesOfConfig.length; i++) {
                 var thisLineOfConfig = linesOfConfig[i];
@@ -208,30 +219,12 @@
                 if (thisLineOfConfig.charAt(0) === "!" || thisLineOfConfig.charAt(0) === " ") { continue; }
                 
                 var wordsInThisLine = thisLineOfConfig.split(" ");
-                AddThisLineToConfigTree(wordsInThisLine);
-
-                j = i + 1;
-                var nextLine = linesOfConfig[j];
-                while (nextLine.charAt(0) === " ") {
-                    nextLine = nextLine.substr(1, nextLine.length);
-                    if (nextLine.length > 1) {
-                        var isAlreadyInList = false;
-                        for (var x = 0; x < subConfigs.length; x++) {
-                            if (nextLine == subConfigs[x]) {
-                                isAlreadyInList = true;
-                            }
-                        }
-                        if (isAlreadyInList == false) {
-                            subConfigs.push(nextLine);
-                        }
-                    }
-                    j++;
-                    nextLine = linesOfConfig[j];
-                }
+                
+                AddThisLineToConfigTree(wordsInThisLine);                
             }
         }
 
-/////////////////////// This function add words in a line of config to rootConfig tree/////////////////////////////
+/////////////////////// This functions add words in a line of config to rootConfig tree/////////////////////////////
 
         function AddThisLineToConfigTree(wordsInThisLine) {
             if (wordsInThisLine[0] == "interface")
@@ -239,37 +232,23 @@
             var precededWords = [];
             var indexOfNewWord = 0;
             // find preceded words if they exist already
-            for(var i = 0; i < PreviousMainLinesOfConfig.length; i++) {
-                var thisLine = PreviousMainLinesOfConfig[i].split(" ");
-                var j = i;
-                while (thisLine[j] == wordsInThisLine[j]) {
-                    precededWords.push(wordsInThisLine[j]);
-                    indexOfNewWord++;
-                    j++;
-                }
-                // if (thisLine[0] === wordsInThisLine[0]) {
-                //     precededWords+= wordsInThisLine[0];
-                //     indexOfNewWord++;
-                //     for (var j = 1; j < thisLine.length; j++) {
-                //         if (thisLine[j] == wordsInThisLine[j]) {
-                //             precededWords+= wordsInThisLine[j];
-                //             // if (j < wordsInThisLine.length)
-                //                 indexOfNewWord++;
-                //         }
-                //     }
-                // }
+            var i = 0;            
+            while (wordsInThisLine[i] === PreviousMainLineOfConfig[i]) {
+                precededWords.push(wordsInThisLine[i]);
+                indexOfNewWord++;
+                i++;
             }
-
+            
             for (var i = indexOfNewWord; i < wordsInThisLine.length; i++) {
                 var thisNode = wordsInThisLine[i];
                 // Locate Parent And Insert This Node Under It
                 var parent = LocateLastNodeInList(precededWords);
                 InsertNodeUnderItsParent(thisNode, parent);
-                // AddNode(precededWords, thisNode)
                 precededWords.push(thisNode);
             }
             
-            PreviousMainLinesOfConfig.push(wordsInThisLine.join(" "));
+            PreviousMainLineOfConfig = wordsInThisLine;
+            mainLines.push(wordsInThisLine.join(" "));     // for keeping main lines of config
         }
 
 
@@ -278,7 +257,7 @@
             var index = 0;
             while (index < precededNodesList.length) {
                 var childs = lastNode.children;
-                for (var i = 0; i < childs.length; i++) {
+                for (var i = childs.length - 1 ; i >= 0; i--) {
                     if (childs[i].value == precededNodesList[index]) {
                         lastNode = childs[i];
                         index++;
@@ -346,7 +325,33 @@
         ///////////////////////////////////// end of functions that add nodes to tree of config ////////////
 
 
+        
+        ////////////////////////  these functions find sub configs for 3 input textbox   ///////////////////
+        function PopulateSubconfigForInputs() {
+            subConfigForInput1 = ["salam", "oobi", "manam doobam"];
+            // j = i + 1;
+            //     var nextLine = linesOfConfig[j];
+            //     while (nextLine.charAt(0) === " ") {
+            //         nextLine = nextLine.substr(1, nextLine.length);
+            //         if (nextLine.length > 1) {
+            //             var isAlreadyInList = false;
+            //             for (var x = 0; x < subConfigForInput1.length; x++) {
+            //                 if (nextLine == subConfigForInput1[x]) {
+            //                     isAlreadyInList = true;
+            //                 }
+            //             }
+            //             if (isAlreadyInList == false) {
+            //                 subConfigForInput1.push(nextLine);
+            //             }
+            //         }
+            //         j++;
+            //         nextLine = linesOfConfig[j];
+            //     }      
+        }
+        
+        ////////////////////////  end of functions that find sub configs for 3 input textbox  //////////////
 
+        // Important note: the method node.children return a list of nodes, but below method return a list of strings 
         function ChildrenValuesInString(node) {
             var childsValues = [];
             for (i = 0; i < node.children.length; i++) {
@@ -381,14 +386,14 @@
         // Give string array to a Select to populate its options.
         function PopulateThisSelect(selectId, node) {
             ResetElement(selectId);
-            var list = ChildrenValuesInString(node);
-            list.push("");
+            var list = node.children;
+            list.push(new Node(" "));
             var firstSelect = document.getElementById(selectId);
             for (var i = 0; i < list.length; i++) {
                 var option = document.createElement("OPTION");
-                var item = document.createTextNode(list[i]);
+                var item = document.createTextNode(list[i].value);
                 option.appendChild(item);
-                option.setAttribute("value", list[i]);
+                option.setAttribute("value", list[i].value);
                 firstSelect.insertBefore(option, firstSelect.lastChild);
             }
         }
@@ -697,8 +702,8 @@
             });
         }
 
-        //var subConfigs = ["tunnel source", "tunnel destination", "ip address"];
-        //autocomplete(document.getElementById("myInput"), subConfigs);
+        //var subConfigForInput1 = ["tunnel source", "tunnel destination", "ip address"];
+        //autocomplete(document.getElementById("myInput"), subConfigForInput1);
 
         /////////////////////////////////////// end of script for autocomplete text input //////////////////    
         function ShowRelatedRoute() {

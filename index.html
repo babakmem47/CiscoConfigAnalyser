@@ -21,7 +21,8 @@
                     <label for="InputFileButton">Browse</label>
                     <input class="btn btn-primary" type="file" id="InputFileButton" onchange="LoadTextFile()">
                 </div>
-                <textarea id="textarea1" class="form-control" rows="38" columns="20"></textarea>
+                <textarea id="textarea1" class="form-control" style="background-color:black; color:lightgray" spellcheck="false" rows="38"
+                    columns="20"></textarea>
             </div>
             <div class="col-xs-6 col-lg-6">
                 <form class="form-inline">
@@ -59,37 +60,21 @@
                         <input type="text" class="form-control" id="SubConfigInput" placeholder="input text here..."> 
                     </div>
                 </form> -->
-                <br/>    
-                <form class="form-inline"  autocomplete="off">
-                    <label for="myInput">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  That &nbsp</label>
+                <br/>
+                <form class="form-inline" autocomplete="off">
+                    <label for="myInput">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; That &nbsp</label>
                     <select class="form-control" style="width: auto;" id="HaveNotHave1">
                         <option>Have</option>
                         <option>Not Have</option>
                     </select>
-                    
+
                     <div class="autocomplete" style="width:400px;">
-                       <input id="myInput" class="input-sm" type="text" name="subConfig" placeholder="Write something ...">
-                    </div>
-                </form>
-                
-                <form class="form-inline"  autocomplete="off">
-                    <select class="form-control" id="ANDOR1">
-                        <option>AND</option>
-                        <option>OR</option>
-                    </select>
-                    <select class="form-control" id="HaveNotHave1">
-                        <option>Have</option>
-                        <option>Not Have</option>
-                    </select>
-                                        
-                    <div class="autocomplete" style="width:400px;">
-                       <input id="myInput2" class="input-sm" type="text" name="subConfig2" placeholder="Write something ...">
+                        <input id="myInput" onchange="ShowHideSecondCondition()" class="input-sm" type="text" name="subConfig" placeholder="Write something ...">
                     </div>
                 </form>
 
-                <form class="form-inline"  autocomplete="off">
-                    <!-- I remove: action="/action_page.php" -->
-                    <select class="form-control" id="ANDOR2">
+                <form id="formSecondCondition" class="form-inline" autocomplete="off" hidden>
+                    <select class="form-control" id="ANDOR1">
                         <option>AND</option>
                         <option>OR</option>
                     </select>
@@ -97,21 +82,51 @@
                         <option>Have</option>
                         <option>Not Have</option>
                     </select>
-                                        
+
                     <div class="autocomplete" style="width:400px;">
-                        <!-- <label for="myInput">SubConfig must Contain: </label> -->
-                       <input id="myInput3" class="input-sm" type="text" name="subConfig3" placeholder="Write something ...">
+                        <input id="myInput2" class="input-sm" type="text" name="subConfig2" placeholder="Write something ...">
                     </div>
-                    <!-- <input type="submit"> -->
+
                 </form>
 
+                <!-- <form class="form-inline" autocomplete="off"> -->
+                <!-- I remove: action="/action_page.php" -->
+                <!-- <select class="form-control" id="ANDOR2">
+                        <option>AND</option>
+                        <option>OR</option>
+                    </select>
+                    <select class="form-control" id="HaveNotHave2">
+                        <option>Have</option>
+                        <option>Not Have</option>
+                    </select>
 
-                <br>
-                <textarea id="textarea2" class="form-control" rows="28" columns="20"></textarea>
-                <div id="counterDiv">
+                    <div class="autocomplete" style="width:400px;"> -->
+                <!-- <label for="myInput">SubConfig must Contain: </label> -->
+                <!-- <input id="myInput3" class="input-sm" type="text" name="subConfig3" placeholder="Write something ...">
+                    </div> -->
+                <!-- <input type="submit"> -->
+                <!-- </form> -->
 
+                <div class="checkbox">
+                    <label>
+                        <input id="checkboxSubConfig" type="checkbox" value="" onchange="HideSubConfig()">Hide subconfig</label>
                 </div>
-                <br>
+
+                <div class="checkbox">
+                    <label>
+                        <input id="checkboxInsertNo" type="checkbox" value="" onchange="InsertNoAtTheBeginning()">Insert 'no' at the beginning</label>
+                </div>
+
+
+                <textarea id="textarea2" class="form-control" style="background-color:black; color: lightgray" spellcheck="false" rows="28"
+                    columns="20"></textarea>
+                <!-- <div id="counterDiv">
+
+                </div> -->
+                <br/> Count: &nbsp;&nbsp;
+                <span id="CounterSpan" class="badge badge-success"></span>
+                <br/>
+                <br/>
                 <button id="ShowRelRoute" class="btn btn-info" onclick="ShowRelatedRoute()">Show Related Route</button>
 
                 <!-- <button id="button2" class="btn btn-default" onclick="PopulateFirstSelect(['interface', 'ip', 'controller'])">PopulateSelect1</button>
@@ -132,11 +147,10 @@
     <script>
 
         var rootConfig = new Node('rootConfig');
+        var linesOfConfig = [];
         var mainLines = [];
         var PreviousMainLineOfConfig = [];
-        var subConfigForInput1 = [];
-        var subConfigForInput2 = [];
-        var subConfigForInput3 = [];
+        var resultInTextarea2 = [];
 
 
         function Node(value) {
@@ -184,11 +198,11 @@
                 // reset config tree
                 rootConfig.removeChildren();
 
-                
-                var linesOfConfig = document.getElementById("textarea1").value.split("\n");
+                linesOfConfig = [];
+                linesOfConfig = document.getElementById("textarea1").value.split("\n");
                 BuildConfigTree(linesOfConfig);
 
-                
+
                 var listOfFirstWords = ChildrenValuesInString(rootConfig);
                 var preferedItems = ["interface", "ip", "controller", "line", "hostname", "username", "enable", "access-list", "router", "clock", "license", "version"];
                 rootConfig = SortNodeChildsBaseOnPreferedItems(rootConfig, preferedItems);
@@ -196,12 +210,8 @@
                 PopulateThisSelect("select1", rootConfig);
                 PopulateSelects("select1");
 
-                subConfigForInput1 = [];
-                subConfigForInput2 = [];
-                subConfigForInput3 = [];
-                PopulateSubconfigForInputs();
-                
-                autocomplete(document.getElementById("myInput"), subConfigForInput1);
+                //PopulateSubconfigForInputs(); 
+
                 /////////////////////////////////////////////////////////////////////////////////////
 
             };
@@ -217,14 +227,14 @@
                 var thisLineOfConfig = linesOfConfig[i];
                 if (thisLineOfConfig.length == 0) { continue; }
                 if (thisLineOfConfig.charAt(0) === "!" || thisLineOfConfig.charAt(0) === " ") { continue; }
-                
+
                 var wordsInThisLine = thisLineOfConfig.split(" ");
-                
-                AddThisLineToConfigTree(wordsInThisLine);                
+
+                AddThisLineToConfigTree(wordsInThisLine);
             }
         }
 
-/////////////////////// This functions add words in a line of config to rootConfig tree/////////////////////////////
+        /////////////////////// This functions add words in a line of config to rootConfig tree/////////////////////////////
 
         function AddThisLineToConfigTree(wordsInThisLine) {
             if (wordsInThisLine[0] == "interface")
@@ -232,13 +242,13 @@
             var precededWords = [];
             var indexOfNewWord = 0;
             // find preceded words if they exist already
-            var i = 0;            
+            var i = 0;
             while (wordsInThisLine[i] === PreviousMainLineOfConfig[i]) {
                 precededWords.push(wordsInThisLine[i]);
                 indexOfNewWord++;
                 i++;
             }
-            
+
             for (var i = indexOfNewWord; i < wordsInThisLine.length; i++) {
                 var thisNode = wordsInThisLine[i];
                 // Locate Parent And Insert This Node Under It
@@ -246,7 +256,7 @@
                 InsertNodeUnderItsParent(thisNode, parent);
                 precededWords.push(thisNode);
             }
-            
+
             PreviousMainLineOfConfig = wordsInThisLine;
             mainLines.push(wordsInThisLine.join(" "));     // for keeping main lines of config
         }
@@ -257,7 +267,7 @@
             var index = 0;
             while (index < precededNodesList.length) {
                 var childs = lastNode.children;
-                for (var i = childs.length - 1 ; i >= 0; i--) {
+                for (var i = childs.length - 1; i >= 0; i--) {
                     if (childs[i].value == precededNodesList[index]) {
                         lastNode = childs[i];
                         index++;
@@ -325,30 +335,85 @@
         ///////////////////////////////////// end of functions that add nodes to tree of config ////////////
 
 
-        
+
         ////////////////////////  these functions find sub configs for 3 input textbox   ///////////////////
         function PopulateSubconfigForInputs() {
-            subConfigForInput1 = ["salam", "oobi", "manam doobam"];
-            // j = i + 1;
-            //     var nextLine = linesOfConfig[j];
-            //     while (nextLine.charAt(0) === " ") {
-            //         nextLine = nextLine.substr(1, nextLine.length);
-            //         if (nextLine.length > 1) {
-            //             var isAlreadyInList = false;
-            //             for (var x = 0; x < subConfigForInput1.length; x++) {
-            //                 if (nextLine == subConfigForInput1[x]) {
-            //                     isAlreadyInList = true;
-            //                 }
-            //             }
-            //             if (isAlreadyInList == false) {
-            //                 subConfigForInput1.push(nextLine);
-            //             }
-            //         }
-            //         j++;
-            //         nextLine = linesOfConfig[j];
-            //     }      
+            // subConfigForInput1 = ["salam", "oobi", "manam doobam"];
+            var inputText1List = [];
+            // var inputText2List = [];
+            // var inputText3List = [];
+            var select1Value = document.getElementById("select1").value;
+            var select2Value = document.getElementById("select2").value;
+            var select3Value = document.getElementById("select3").value;
+            var select4Value = document.getElementById("select4").value;
+            var searchContent = select1Value + " " + select2Value + " " + select3Value + " " + select4Value;
+            if (select1Value == "interface") {
+                searchContent = select1Value + " " + select2Value + select3Value + select4Value;
+            }
+            searchContent = searchContent.trim();
+
+            var i = 0;
+            while (i < linesOfConfig.length) {
+                var thisLine = linesOfConfig[i];
+                if (thisLine.length == 0) { i++; continue; }
+                if (thisLine.charAt(0) === "!" || thisLine.charAt(0) === " ") { i++; continue; }
+
+                if (thisLine.includes(searchContent)) {
+                    var j = i + 1;
+                    var nextLine = linesOfConfig[j];
+                    if (nextLine.charAt(0) != " ") { i++; continue; }
+
+                    while (nextLine.charAt(0) === " ") {
+                        nextLine = nextLine.trim();
+                        if (nextLine.length < 2) { break; }
+
+                        var isAlreadyInList = false;
+                        if (inputText1List.includes(nextLine))
+                            isAlreadyInList = true;
+
+                        if (!isAlreadyInList)
+                            inputText1List.push(nextLine);
+
+                        j++;
+                        i = j;
+                        nextLine = linesOfConfig[j];
+                    }
+
+                }
+                else {
+                    i++;
+                }
+
+            }
+
+            autocomplete(document.getElementById("myInput"), inputText1List);
+            autocomplete(document.getElementById("myInput2"), inputText1List);
+            // autocomplete(document.getElementById("myInput3"), inputText1List);
+
+            // if (thisLine[i].includes(searchContent) {
+            //     var j = i + 1;
+            //     // var nextLine = linesOfConfig[j];
+            //     // while (nextLine.charAt(0) === " ") {
+            //     //     nextLine = nextLine.substr(1, nextLine.length);
+            //     //     if (nextLine.length > 1) {
+            //     //         var isAlreadyInList = false;
+            //     //         for (var x = 0; x < inputText1List.length; x++) {
+            //     //             if (nextLine == inputText1List[x]) {
+            //     //                 isAlreadyInList = true;
+            //     //             }
+            //     //         }
+            //     //         if (isAlreadyInList == false) {
+            //     //             inputText1List.push(nextLine);
+            //     //         }
+            //     //     }
+            //     //     j++;
+            //     //     nextLine = linesOfConfig[j];
+            //     // }
+
+            //     i = j;
+            // }    
         }
-        
+
         ////////////////////////  end of functions that find sub configs for 3 input textbox  //////////////
 
         // Important note: the method node.children return a list of nodes, but below method return a list of strings 
@@ -386,8 +451,8 @@
         // Give string array to a Select to populate its options.
         function PopulateThisSelect(selectId, node) {
             ResetElement(selectId);
-            var list = node.children;
-            list.push(new Node(" "));
+            var list = node.children;    // notice that list is a list of nodes!     // also variable list is a pointer!
+            list.push(new Node(""));
             var firstSelect = document.getElementById(selectId);
             for (var i = 0; i < list.length; i++) {
                 var option = document.createElement("OPTION");
@@ -396,26 +461,13 @@
                 option.setAttribute("value", list[i].value);
                 firstSelect.insertBefore(option, firstSelect.lastChild);
             }
+            list.pop();   // remove "" from original tree because variable list is a pointer!!
         }
 
-        // function PopulateSelects() {
-        //     var selectsOptionList = GetAllSelectedOptions();
-        //     for(var i = 0; i < GetAllSelectedOptions.length; i++) {
-        //         var thisValue = selectsOptionList[i];
-        //         if(thisValue == "") {
-        //             for(var j = i+1; j <= 4; j++){
-        //                 var selectName = "select" + j;
-        //                 ResetElement(selectName);
-        //             }
-        //         }
 
-
-        //     }
-        //     var selectName = "select" + i;
-        //     var 
-        // }
 
         function PopulateSelects(selectId) {
+            ResetOtherElements();
             var thisSelectValue = document.getElementById(selectId).value;
             var list = [];
             switch (selectId) {
@@ -424,7 +476,7 @@
                     ResetElement("select3");
                     ResetElement("select4");
                     if (thisSelectValue == "") {
-                        console.log(GetAllSelectedOptions());
+                        // console.log(GetAllSelectedOptions());
                         break;
                     }
                     list.push(thisSelectValue);
@@ -434,7 +486,7 @@
                         PopulateSelects("select2");
                     }
                     else {
-                        console.log(GetAllSelectedOptions());
+                        // console.log(GetAllSelectedOptions());
                     }
                     break;
 
@@ -444,7 +496,7 @@
                     var select1Value = document.getElementById("select1").value;
                     list.push(select1Value);
                     if (thisSelectValue == "") {
-                        console.log(GetAllSelectedOptions());
+                        // console.log(GetAllSelectedOptions());
                         break;
                     }
                     else {
@@ -455,7 +507,7 @@
                             PopulateSelects("select3");
                         }
                         else {
-                            console.log(GetAllSelectedOptions());
+                            // console.log(GetAllSelectedOptions());
                         }
                     }
                     break;
@@ -467,7 +519,7 @@
                     list.push(select1Value);
                     list.push(select2Value);
                     if (thisSelectValue == "") {
-                        console.log(GetAllSelectedOptions());
+                        // console.log(GetAllSelectedOptions());
                         break;
                     }
                     else {
@@ -477,7 +529,7 @@
                             PopulateThisSelect("select4", findedNode);
                         }
                     }
-                    console.log(GetAllSelectedOptions());
+                    // console.log(GetAllSelectedOptions());
                     break;
                 case "select4":
                     var select1Value = document.getElementById("select1").value;
@@ -487,20 +539,20 @@
                     list.push(select2Value);
                     list.push(select3Value);
                     if (thisSelectValue == "") {
-                        console.log(GetAllSelectedOptions());
+                        // console.log(GetAllSelectedOptions());
                         break;
                     }
                     else {
                         list.push(thisSelectValue);
                     }
-                    console.log(GetAllSelectedOptions());
+                    // console.log(GetAllSelectedOptions());
 
                     break;
 
                 // default:
                 //     break;
             }
-
+            PopulateSubconfigForInputs();
         }
 
         //  Show result base on selected options 
@@ -519,6 +571,7 @@
             return selectOptions;
         }
 
+
         function ShowResultBasedOnSelectedOptions() {
             var listOfSelectedOptions = GetAllSelectedOptions();
             var wantedContext = "";
@@ -532,7 +585,9 @@
                 wantedContext = listOfSelectedOptions.join(" ");
             }
             var linesOfConfig = document.getElementById("textarea1").value.split("\n");
-            var subCfg = document.getElementById("myInput").value;
+            var inputText1Content = document.getElementById("myInput").value;
+            var inputText2Content = document.getElementById("myInput2").value;
+            
             var searchResult = [];
             var counter = 0;
             var i = 0;
@@ -542,41 +597,99 @@
                 if (thisLine.charAt(0) === "!" || thisLine.charAt(0) === " ") { i++; continue; }
                 var isInSubConfig = false;
                 var pushedItems = 0;
-                if (thisLine.includes(wantedContext)) {
-                    searchResult.push(thisLine);
-                    counter++;
-                    pushedItems++;
-                    i++;
-                    var nextline = linesOfConfig[i];
-                    while (nextline.charAt(0) == " ") {
-                        searchResult.push(nextline);
-                        pushedItems++;
-                        i++;
-                        if (nextline.includes(subCfg)) {
-                            isInSubConfig = true;
+                var wordsInThisLine = thisLine.split(" ");
+                if (thisLine.includes(wantedContext) && wordsInThisLine[0] == listOfSelectedOptions[0]) {
+                    var subConfig = []
+                    var j = i +1; 
+                    while (linesOfConfig[j].charAt(0) == " ") {
+                        subConfig.push(linesOfConfig[i]);                        
+                        j++;
+                    }
+
+                    if (inputText1Content.length == 0 && inputText2Content.length == 0) {
+                        searchResult.push(thisLine);
+                        for (var k = 0; k < subConfig.length; k++)
+                            searchResult.push(subConfig[k]);
+                        searchResult.push("!");                        
+                    }
+                    else if (inputText1Content.length > 0 && inputText2Content.length == 0) {
+                        var haveNotHave1 = document.getElementById("HaveNotHave1").value;
+                        if (haveNotHave1 == "Have"){
+
                         }
-                        nextline = linesOfConfig[i];
-                    }
-                    searchResult.push("!");
-                    pushedItems++;
-                    if (subCfg == "") {
-                        // do nothing 
-                    }
-                    else if (subCfg.length > 0 && isInSubConfig == false) {
-                        for (var j = 0; j < pushedItems; j++) {
-                            searchResult.pop();
+                        else if (haveNotHave1 == "Not Have"){
+
                         }
-                        counter--;
                     }
-                    continue;
+                    else if (inputText1Content.length > 0 && inputText2Content.length > 0) {
+                        
+                    }
+                    
                 }
-                i++;
             }
-            var resultline = searchResult.join("\n");
-            document.getElementById("textarea2").innerHTML = resultline;
-            document.getElementById("counterDiv").innerHTML = counter;
-            //console.log("Show Btn:" + searchResult);
         }
+
+
+        // function ShowResultBasedOnSelectedOptions() {
+        //     var listOfSelectedOptions = GetAllSelectedOptions();
+        //     var wantedContext = "";
+        //     if (listOfSelectedOptions[0] == "interface") {
+        //         wantedContext = "interface "
+        //         for (var i = 1; i < listOfSelectedOptions.length; i++) {
+        //             wantedContext += listOfSelectedOptions[i];
+        //         }
+        //     }
+        //     else {
+        //         wantedContext = listOfSelectedOptions.join(" ");
+        //     }
+        //     var linesOfConfig = document.getElementById("textarea1").value.split("\n");
+        //     var subCfg = document.getElementById("myInput").value;
+        //     var searchResult = [];
+        //     var counter = 0;
+        //     var i = 0;
+        //     while (i < linesOfConfig.length) {
+        //         var thisLine = linesOfConfig[i];
+        //         if (thisLine.length == 0) { i++; continue; }
+        //         if (thisLine.charAt(0) === "!" || thisLine.charAt(0) === " ") { i++; continue; }
+        //         var isInSubConfig = false;
+        //         var pushedItems = 0;
+        //         var wordsInThisLine = thisLine.split(" ");
+        //         if (thisLine.includes(wantedContext) && wordsInThisLine[0] == listOfSelectedOptions[0]) {
+        //             searchResult.push(thisLine);
+        //             counter++;
+        //             pushedItems++;
+        //             i++;
+        //             var nextline = linesOfConfig[i];
+        //             while (nextline.charAt(0) == " ") {
+        //                 searchResult.push(nextline);
+        //                 pushedItems++;
+        //                 i++;
+        //                 if (nextline.includes(subCfg)) {
+        //                     isInSubConfig = true;
+        //                 }
+        //                 nextline = linesOfConfig[i];
+        //             }
+        //             searchResult.push("!");
+        //             pushedItems++;
+        //             if (subCfg == "") {
+        //                 // do nothing 
+        //             }
+        //             else if (subCfg.length > 0 && isInSubConfig == false) {
+        //                 for (var j = 0; j < pushedItems; j++) {
+        //                     searchResult.pop();
+        //                 }
+        //                 counter--;
+        //             }
+        //             continue;
+        //         }
+        //         i++;
+        //     }
+        //     var resultline = searchResult.join("\n");
+        //     document.getElementById("textarea2").innerHTML = resultline;
+        //     //document.getElementById("counterDiv").innerHTML = counter;
+        //     document.getElementById("CounterSpan").innerHTML = counter;
+
+        // }
 
         function ResetElement(elementId) {
             var element = document.getElementById(elementId);
@@ -602,7 +715,7 @@
                 i++;
             }
         }
-        
+
 
         //////////////////////////////////////  script for autocomplete text input /////////////////////////
         function autocomplete(inp, arr) {
@@ -706,6 +819,61 @@
         //autocomplete(document.getElementById("myInput"), subConfigForInput1);
 
         /////////////////////////////////////// end of script for autocomplete text input //////////////////    
+
+        function HideSubConfig() {
+            resultInTextarea2 = document.getElementById("textarea2").value.split("\n");
+            var newResult = [];
+            var isChecked = document.getElementById("checkboxSubConfig").checked;
+            if (isChecked) {
+                for (var i = 0; i < resultInTextarea2.length; i++) {
+                    if (resultInTextarea2[i].charAt(0) != " " && resultInTextarea2[i] != "!")
+                        newResult.push(resultInTextarea2[i]);
+                }
+                document.getElementById("textarea2").innerHTML = newResult.join("\n");
+            }
+            else {
+                ShowResultBasedOnSelectedOptions();
+            }
+        }
+
+        function ResetOtherElements() {
+            document.getElementById("myInput").value = '';
+            document.getElementById("myInput2").value = '';
+            // document.getElementById("myInput3").value = '';
+            document.getElementById("checkboxSubConfig").checked = false;
+            document.getElementById("checkboxInsertNo").checked = false;
+        }
+
+        function InsertNoAtTheBeginning() {
+            resultContent = document.getElementById("textarea2").value.split("\n");
+            var isChecked = document.getElementById("checkboxInsertNo").checked;
+            if (isChecked) {
+                for (var i = 0; i < resultContent.length; i++) {
+                    if (resultContent[i].charAt(0) == "!" || resultContent[i].charAt(1) == "!") { continue; }
+
+                    else if (resultContent[i].charAt(0) == " ") {
+                        resultContent[i] = " no" + resultContent[i];
+                    }
+                    else
+                        resultContent[i] = "no " + resultContent[i];
+                }
+                document.getElementById("textarea2").innerHTML = resultContent.join("\n");
+            }
+            else
+                ShowResultBasedOnSelectedOptions();
+
+        }
+
+        function ShowHideSecondCondition() {
+            var inputText1Content =  document.getElementById("myInput").value;
+            if (inputText1Content.length > 0)
+                document.getElementById("formSecondCondition").hidden = false;
+            else
+                document.getElementById("formSecondCondition").hidden = true;
+            
+        }
+
+
         function ShowRelatedRoute() {
             var myWidow = window.open("", "_blank", "toolbar=yes,scrollbars=yes,resizable=yes,top=100,left=500,width=500,height=800");
             myWidow.document.write("ip route 0.0.0.0 0.0.0.0 10.200.0.18 <br>");

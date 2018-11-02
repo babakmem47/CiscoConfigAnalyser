@@ -147,6 +147,7 @@ input {
   background-color: #f1f1f1;
   padding: 10px;
   font-size: 16px;
+  
 }
 
  /* ////////// I insert class below for autocomplete textbox input //////////// */
@@ -155,6 +156,7 @@ input {
   /*the container must be positioned relative:*/
   position: relative;
   display: inline-block;
+   
 }
 
 input[type=text] {
@@ -178,6 +180,9 @@ input[type=submit] {
   top: 100%;
   left: 0;
   right: 0;
+  max-height: 432px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .autocomplete-items div {

@@ -63,13 +63,13 @@
                 <br/>
                 <form class="form-inline" autocomplete="off">
                     <label for="myInput">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; That &nbsp</label>
-                    <select class="form-control" style="width: auto;" id="HaveNotHave1">
+                    <select class="form-control" style="width: auto;" id="HaveNotHave1" onchange="ResetCheckBoxes()">
                         <option>Have</option>
                         <option>Not Have</option>
                     </select>
 
                     <div class="autocomplete" style="width:400px;">
-                        <input id="myInput" onchange="ShowHideSecondCondition()" class="input-sm" type="text" name="subConfig" placeholder="Write something ...">
+                        <input id="myInput" onkeyup="ShowHideSecondCondition()" class="input-sm" type="text" name="subConfig" placeholder="Write something ...">
                     </div>
                 </form>
 
@@ -587,7 +587,7 @@
             var linesOfConfig = document.getElementById("textarea1").value.split("\n");
             var inputText1Content = document.getElementById("myInput").value;
             var inputText2Content = document.getElementById("myInput2").value;
-            
+
             var searchResult = [];
             var counter = 0;
             var i = 0;
@@ -600,34 +600,172 @@
                 var wordsInThisLine = thisLine.split(" ");
                 if (thisLine.includes(wantedContext) && wordsInThisLine[0] == listOfSelectedOptions[0]) {
                     var subConfig = []
-                    var j = i +1; 
+                    var j = i + 1;
                     while (linesOfConfig[j].charAt(0) == " ") {
-                        subConfig.push(linesOfConfig[i]);                        
+                        subConfig.push(linesOfConfig[j]);
                         j++;
                     }
 
                     if (inputText1Content.length == 0 && inputText2Content.length == 0) {
                         searchResult.push(thisLine);
-                        for (var k = 0; k < subConfig.length; k++)
+                        counter++;
+                        for (var k = 0; k < subConfig.length; k++) {
                             searchResult.push(subConfig[k]);
-                        searchResult.push("!");                        
+                        }
+                        searchResult.push("!");
                     }
                     else if (inputText1Content.length > 0 && inputText2Content.length == 0) {
                         var haveNotHave1 = document.getElementById("HaveNotHave1").value;
-                        if (haveNotHave1 == "Have"){
-
+                        if (haveNotHave1 == "Have") {
+                            var isText1ContentInSub = false;
+                            for (var k = 0; k < subConfig.length; k++)
+                                if (subConfig[k].indexOf(inputText1Content) > -1) {
+                                    isText1ContentInSub = true;
+                                    break;
+                                }
+                            if (isText1ContentInSub) {
+                                searchResult.push(thisLine);
+                                counter++;
+                                for (var k = 0; k < subConfig.length; k++) {
+                                    searchResult.push(subConfig[k]);
+                                }
+                                searchResult.push("!");
+                            }
                         }
-                        else if (haveNotHave1 == "Not Have"){
-
+                        else if (haveNotHave1 == "Not Have") {
+                            var isText1ContentInSub = false;
+                            for (var k = 0; k < subConfig.length; k++) {
+                                if (subConfig[k].indexOf(inputText1Content) > -1) {
+                                    isText1ContentInSub = true;
+                                    break;
+                                }
+                            }
+                            if (!isText1ContentInSub) {
+                                searchResult.push(thisLine);
+                                counter++;
+                                for (var k = 0; k < subConfig.length; k++) {
+                                    searchResult.push(subConfig[k]);
+                                }
+                                searchResult.push("!");
+                            }
                         }
                     }
+
                     else if (inputText1Content.length > 0 && inputText2Content.length > 0) {
-                        
+                        var haveNotHave1 = document.getElementById("HaveNotHave1").value;
+                        var haveNotHave2 = document.getElementById("HaveNotHave2").value;
+                        var andOr = document.getElementById("ANDOR1").value;
+                        var isText1ContentInSub = false;
+                        var isText2ContentInSub = false;
+                        for (var k = 0; k < subConfig.length; k++) {
+                            if (subConfig[k].indexOf(inputText1Content) > -1) {
+                                isText1ContentInSub = true;
+                            }
+                            if (subConfig[k].indexOf(inputText2Content) > -1) {
+                                isText2ContentInSub = true;
+                            }
+                        }
+
+                        if (andOr == "AND") {
+                            if (haveNotHave1 == "Have" && haveNotHave2 == "Have") {
+                                if (isText1ContentInSub && isText2ContentInSub) {
+                                    searchResult.push(thisLine);
+                                    counter++;
+                                    for (var k = 0; k < subConfig.length; k++) {
+                                        searchResult.push(subConfig[k]);
+                                    }
+                                    searchResult.push("!");
+                                }
+                            }
+                            else if (haveNotHave1 == "Have" && haveNotHave2 == "Not Have") {
+                                if (isText1ContentInSub && isText2ContentInSub == false) {
+                                    searchResult.push(thisLine);
+                                    counter++;
+                                    for (var k = 0; k < subConfig.length; k++) {
+                                        searchResult.push(subConfig[k]);
+                                    }
+                                    searchResult.push("!");
+                                }
+                            }
+                            else if (haveNotHave1 == "Not Have" && haveNotHave2 == "Have") {
+                                if (isText1ContentInSub == false && isText2ContentInSub) {
+                                    searchResult.push(thisLine);
+                                    counter++;
+                                    for (var k = 0; k < subConfig.length; k++) {
+                                        searchResult.push(subConfig[k]);
+                                    }
+                                    searchResult.push("!");
+                                }
+                            }
+                            else if (haveNotHave1 == "Not Have" && haveNotHave2 == "Not Have") {
+                                if (isText1ContentInSub == false && isText2ContentInSub == false) {
+                                    searchResult.push(thisLine);
+                                    counter++;
+                                    for (var k = 0; k < subConfig.length; k++) {
+                                        searchResult.push(subConfig[k]);
+                                    }
+                                    searchResult.push("!");
+                                }
+                            }
+                        }
+                        else if (andOr = "OR") {
+                            if (haveNotHave1 == "Have" && haveNotHave2 == "Have") {
+                                if (isText1ContentInSub || isText2ContentInSub) {
+                                    searchResult.push(thisLine);
+                                    counter++;
+                                    for (var k = 0; k < subConfig.length; k++) {
+                                        searchResult.push(subConfig[k]);
+                                    }
+                                    searchResult.push("!");
+                                }
+                            }
+                            else if (haveNotHave1 == "Have" && haveNotHave2 == "Not Have") {
+                                if (isText1ContentInSub || isText2ContentInSub == false) {
+                                    searchResult.push(thisLine);
+                                    counter++;
+                                    for (var k = 0; k < subConfig.length; k++) {
+                                        searchResult.push(subConfig[k]);
+                                    }
+                                    searchResult.push("!");
+                                }
+                            }
+                            else if (haveNotHave1 == "Not Have" || haveNotHave2 == "Have") {
+                                if (isText1ContentInSub == false && isText2ContentInSub) {
+                                    searchResult.push(thisLine);
+                                    counter++;
+                                    for (var k = 0; k < subConfig.length; k++) {
+                                        searchResult.push(subConfig[k]);
+                                    }
+                                    searchResult.push("!");
+                                }
+                            }
+                            else if (haveNotHave1 == "Not Have" && haveNotHave2 == "Not Have") {
+                                if (isText1ContentInSub == false || isText2ContentInSub == false) {
+                                    searchResult.push(thisLine);
+                                    counter++;
+                                    for (var k = 0; k < subConfig.length; k++) {
+                                        searchResult.push(subConfig[k]);
+                                    }
+                                    searchResult.push("!");
+                                }
+                            }
+                        }
+
+
                     }
-                    
+
                 }
+
+
+                i++;
             }
+
+            document.getElementById("textarea2").innerHTML = searchResult.join("\n");
+            document.getElementById("CounterSpan").innerHTML = counter;
         }
+
+
+
 
 
         // function ShowResultBasedOnSelectedOptions() {
@@ -865,12 +1003,17 @@
         }
 
         function ShowHideSecondCondition() {
-            var inputText1Content =  document.getElementById("myInput").value;
+            var inputText1Content = document.getElementById("myInput").value;
             if (inputText1Content.length > 0)
                 document.getElementById("formSecondCondition").hidden = false;
             else
                 document.getElementById("formSecondCondition").hidden = true;
-            
+
+        }
+
+        function ResetCheckBoxes() {
+            document.getElementById("checkboxSubConfig").checked = false;
+            document.getElementById("checkboxInsertNo").checked = false;
         }
 
 

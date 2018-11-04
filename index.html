@@ -61,62 +61,70 @@
                     </div>
                 </form> -->
                 <br/>
-                <form class="form-inline" autocomplete="off">
-                    <label for="myInput">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; That &nbsp</label>
-                    <select class="form-control" style="width: auto;" id="HaveNotHave1" onchange="ResetCheckBoxes()">
-                        <option>Have</option>
-                        <option>Not Have</option>
-                    </select>
-
-                    <div class="autocomplete" style="width:400px;">
-                        <input id="myInput" onkeyup="ShowHideSecondCondition()" class="input-sm" type="text" name="subConfig" placeholder="Write something ...">
-                    </div>
-                </form>
-
-                <form id="formSecondCondition" class="form-inline" autocomplete="off" hidden>
-                    <select class="form-control" id="ANDOR1">
-                        <option>AND</option>
-                        <option>OR</option>
-                    </select>
-                    <select class="form-control" id="HaveNotHave2">
-                        <option>Have</option>
-                        <option>Not Have</option>
-                    </select>
-
-                    <div class="autocomplete" style="width:400px;">
-                        <input id="myInput2" class="input-sm" type="text" name="subConfig2" placeholder="Write something ...">
-                    </div>
-
-                </form>
-
-                <!-- <form class="form-inline" autocomplete="off"> -->
-                <!-- I remove: action="/action_page.php" -->
-                <!-- <select class="form-control" id="ANDOR2">
-                        <option>AND</option>
-                        <option>OR</option>
-                    </select>
-                    <select class="form-control" id="HaveNotHave2">
-                        <option>Have</option>
-                        <option>Not Have</option>
-                    </select>
-
-                    <div class="autocomplete" style="width:400px;"> -->
-                <!-- <label for="myInput">SubConfig must Contain: </label> -->
-                <!-- <input id="myInput3" class="input-sm" type="text" name="subConfig3" placeholder="Write something ...">
+                <div class="panel panel-danger">
+                    <!-- <div class="panel-heading">
+                        <strong>Filter base on sub config</strong>
                     </div> -->
-                <!-- <input type="submit"> -->
-                <!-- </form> -->
+                    <div class="panel-body">
+                        <form class="form-inline" autocomplete="off">
+                            <label for="myInput">Find Configs That &nbsp</label>
+                            <select class="form-control" style="width: auto;" id="HaveNotHave1" onchange="ResetCheckBoxes()">
+                                <option>Have</option>
+                                <option>Not Have</option>
+                            </select>
 
-                <div class="checkbox">
-                    <label>
-                        <input id="checkboxSubConfig" type="checkbox" value="" onchange="HideSubConfig()">Hide subconfig</label>
+                            <div class="autocomplete" style="width:400px;">
+                                <input id="myInput" onkeyup="ShowHideSecondCondition()" class="input-sm" type="text" name="subConfig" placeholder="Write something ...">
+                            </div>
+                        </form>
+
+                        <form id="formSecondCondition" class="form-inline" autocomplete="off" hidden>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <select class="form-control" id="ANDOR1">
+                                <option>AND</option>
+                                <option>OR</option>
+                            </select>
+                            <select class="form-control" id="HaveNotHave2">
+                                <option>Have</option>
+                                <option>Not Have</option>
+                            </select>
+
+                            <div class="autocomplete" style="width:400px;">
+                                <input id="myInput2" class="input-sm" type="text" name="subConfig2" placeholder="Write something ...">
+                            </div>
+
+                        </form>
+                    </div>
+                    <!-- <div class="panel-footer">
+
+                    </div> -->
                 </div>
 
-                <div class="checkbox">
-                    <label>
-                        <input id="checkboxInsertNo" type="checkbox" value="" onchange="InsertNoAtTheBeginning()">Insert 'no' at the beginning</label>
-                </div>
+                <form class="form-inline">
+                    <select class="form-control" id="CRUDOperations" style="width:auto;">
+                        <option value="" disabled selected> select a command ... </option>
+                        <option>INSERT INTO sub config</option>
+                        <option>DELETE from sub config</option>
+                        <option>Replace in sub config</option>
+                        <option>Hide sub config</option>
+                        <option>Show sub config</option>
+                        <option>Insert "no" at the beginning</option>
+                        <option>Delete "no" at the beginning</option>
+                        <option></option>
+                    </select>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="checkbox">
+                        <label>
+                            <input id="checkboxSubConfig" type="checkbox" value="" onchange="HideSubConfig()">Hide subconfig</label>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="checkbox">
+                        <label>
+                            <input id="checkboxInsertNo" type="checkbox" value="" onchange="InsertNoAtTheBeginning()">Insert 'no' at the beginning</label>
+                    </div>
 
+                </form>
+                <br/>
 
                 <textarea id="textarea2" class="form-control" style="background-color:black; color: lightgray" spellcheck="false" rows="28"
                     columns="20"></textarea>
@@ -624,12 +632,8 @@
                                     break;
                                 }
                             if (isText1ContentInSub) {
-                                searchResult.push(thisLine);
+                                searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                 counter++;
-                                for (var k = 0; k < subConfig.length; k++) {
-                                    searchResult.push(subConfig[k]);
-                                }
-                                searchResult.push("!");
                             }
                         }
                         else if (haveNotHave1 == "Not Have") {
@@ -641,12 +645,8 @@
                                 }
                             }
                             if (!isText1ContentInSub) {
-                                searchResult.push(thisLine);
+                                searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                 counter++;
-                                for (var k = 0; k < subConfig.length; k++) {
-                                    searchResult.push(subConfig[k]);
-                                }
-                                searchResult.push("!");
                             }
                         }
                     }
@@ -669,88 +669,55 @@
                         if (andOr == "AND") {
                             if (haveNotHave1 == "Have" && haveNotHave2 == "Have") {
                                 if (isText1ContentInSub && isText2ContentInSub) {
-                                    searchResult.push(thisLine);
+                                    searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                     counter++;
-                                    for (var k = 0; k < subConfig.length; k++) {
-                                        searchResult.push(subConfig[k]);
-                                    }
-                                    searchResult.push("!");
                                 }
                             }
                             else if (haveNotHave1 == "Have" && haveNotHave2 == "Not Have") {
                                 if (isText1ContentInSub && isText2ContentInSub == false) {
-                                    searchResult.push(thisLine);
+                                    searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                     counter++;
-                                    for (var k = 0; k < subConfig.length; k++) {
-                                        searchResult.push(subConfig[k]);
-                                    }
-                                    searchResult.push("!");
                                 }
                             }
                             else if (haveNotHave1 == "Not Have" && haveNotHave2 == "Have") {
                                 if (isText1ContentInSub == false && isText2ContentInSub) {
-                                    searchResult.push(thisLine);
+                                    searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                     counter++;
-                                    for (var k = 0; k < subConfig.length; k++) {
-                                        searchResult.push(subConfig[k]);
-                                    }
-                                    searchResult.push("!");
                                 }
                             }
                             else if (haveNotHave1 == "Not Have" && haveNotHave2 == "Not Have") {
                                 if (isText1ContentInSub == false && isText2ContentInSub == false) {
-                                    searchResult.push(thisLine);
+                                    searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                     counter++;
-                                    for (var k = 0; k < subConfig.length; k++) {
-                                        searchResult.push(subConfig[k]);
-                                    }
-                                    searchResult.push("!");
                                 }
                             }
                         }
                         else if (andOr = "OR") {
                             if (haveNotHave1 == "Have" && haveNotHave2 == "Have") {
                                 if (isText1ContentInSub || isText2ContentInSub) {
-                                    searchResult.push(thisLine);
+                                    searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                     counter++;
-                                    for (var k = 0; k < subConfig.length; k++) {
-                                        searchResult.push(subConfig[k]);
-                                    }
-                                    searchResult.push("!");
                                 }
                             }
                             else if (haveNotHave1 == "Have" && haveNotHave2 == "Not Have") {
                                 if (isText1ContentInSub || isText2ContentInSub == false) {
-                                    searchResult.push(thisLine);
+                                    searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                     counter++;
-                                    for (var k = 0; k < subConfig.length; k++) {
-                                        searchResult.push(subConfig[k]);
-                                    }
-                                    searchResult.push("!");
                                 }
                             }
                             else if (haveNotHave1 == "Not Have" || haveNotHave2 == "Have") {
                                 if (isText1ContentInSub == false && isText2ContentInSub) {
-                                    searchResult.push(thisLine);
+                                    searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                     counter++;
-                                    for (var k = 0; k < subConfig.length; k++) {
-                                        searchResult.push(subConfig[k]);
-                                    }
-                                    searchResult.push("!");
                                 }
                             }
                             else if (haveNotHave1 == "Not Have" && haveNotHave2 == "Not Have") {
                                 if (isText1ContentInSub == false || isText2ContentInSub == false) {
-                                    searchResult.push(thisLine);
+                                    searchResult = AddToSearchResult(searchResult, thisLine, subConfig);
                                     counter++;
-                                    for (var k = 0; k < subConfig.length; k++) {
-                                        searchResult.push(subConfig[k]);
-                                    }
-                                    searchResult.push("!");
                                 }
                             }
                         }
-
 
                     }
 
@@ -764,7 +731,14 @@
             document.getElementById("CounterSpan").innerHTML = counter;
         }
 
-
+        function AddToSearchResult(oldResult, thisLine, subConfig) {
+            oldResult.push(thisLine);
+            for (var i = 0; i < subConfig.length; i++) {
+                oldResult.push(subConfig[i]);
+            }
+            oldResult.push("!");
+            return oldResult;
+        }
 
 
 
